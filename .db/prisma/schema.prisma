@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Image {
+  id          String @id @default(uuid())
+  url         String
+  key         String @unique
+  bucket      String
+  contentType String
+  size        Int
+
+  users    User[]
+  pets     Pet[]
+  shelters Shelter[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("image")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  firstName String
+  lastName  String
+  username  String  @unique
+  email     String  @unique
+  password  String
+  avatarId  String?
+
+  avatar    Image?     @relation(fields: [avatarId], references: [id])
+  pets      Pet[]
+  shelters  Shelter[]
+  bookmarks Bookmark[]
+  sender    Message[]  @relation("Sender")
+  receiver  Message[]  @relation("Receiver")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user")
+}
+
+model Shelter {
+  id      String  @id @default(uuid())
+  name    String
+  address String
+  city    String
+  state   String
+  zipCode String
+  phone   String
+  email   String
+  website String
+  imageId String?
+  ownerId String?
+
+  owner    User?     @relation(fields: [ownerId], references: [id])
+  image    Image?    @relation(fields: [imageId], references: [id])
+  pets     Pet[]
+  sender   Message[] @relation("Sender")
+  receiver Message[] @relation("Receiver")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("shelter")
+}
+
+enum AdoptionStatus {
+  ADOPTED
+  ADOPTION_PENDING
+  ADOPTION_APPROVED
+}
+
+model Pet {
+  id             String         @id @default(uuid())
+  name           String
+  species        String
+  breed          String
+  gender         String
+  birthDate      DateTime
+  size           String
+  color          String
+  description    String
+  adoptionStatus AdoptionStatus
+  ownerId        String?
+  shelterId      String?
+
+  owner   User?    @relation(fields: [ownerId], references: [id])
+  shelter Shelter? @relation(fields: [shelterId], references: [id])
+
+  images    Image[]
+  bookmarks Bookmark[]
+  messages  Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("pet")
+}
+
+model Bookmark {
+  id     String @id @default(uuid())
+  userId String
+  petId  String
+
+  user User @relation(fields: [userId], references: [id])
+  pet  Pet  @relation(fields: [petId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bookmark")
+}
+
+model Message {
+  id                String  @id @default(uuid())
+  content           String
+  senderUserId      String?
+  senderShelterId   String?
+  receiverUserId    String?
+  receiverShelterId String?
+  petId             String?
+
+  senderUsers     User?    @relation("Sender", fields: [senderUserId], references: [id])
+  senderShelter   Shelter? @relation("Sender", fields: [senderShelterId], references: [id])
+  receiverUser    User?    @relation("Receiver", fields: [receiverUserId], references: [id])
+  receiverShelter Shelter? @relation("Receiver", fields: [receiverShelterId], references: [id])
+  pet             Pet?     @relation(fields: [petId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("message")
+}
