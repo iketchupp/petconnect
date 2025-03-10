@@ -1,186 +1,261 @@
-import { AdoptionStatus, PrismaClient } from "@prisma/client";
+import { PrismaClient, PetStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
+import { hash } from "bcrypt";
 
 const prisma = new PrismaClient();
 
-function getRandomEnumValue<T>(enumObj: { [key: string]: T }): T {
-  const values = Object.values(enumObj);
-  return values[Math.floor(Math.random() * values.length)];
-}
+// Helper function to generate a random item from an array
+const randomItem = <T>(array: T[]): T =>
+  array[Math.floor(Math.random() * array.length)];
 
-async function generateDummyData() {
-  try {
-    // Generate 5 images first
-    const images = await Promise.all(
-      Array(5)
-        .fill(null)
-        .map(async () => {
-          return await prisma.image.create({
-            data: {
-              url: faker.image.url(),
-              key: faker.string.uuid(),
-              bucket: "my-bucket",
-              contentType: "image/jpeg",
-              size: faker.number.int({ min: 1000, max: 5000000 }),
-            },
-          });
-        })
-    );
+// Helper function to get random items from an array
+const getRandomItems = <T>(array: T[], min: number, max: number): T[] => {
+  const count = faker.number.int({ min, max });
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
 
-    // Generate 10 users
-    const users = await Promise.all(
-      Array(10)
-        .fill(null)
-        .map(async () => {
-          return await prisma.user.create({
-            data: {
-              firstName: faker.person.firstName(),
-              lastName: faker.person.lastName(),
-              username: faker.internet.userName(),
-              email: faker.internet.email(),
-              password: faker.internet.password(),
-              avatarId: faker.helpers.arrayElement([
-                ...images.map((img) => img.id),
-                null,
-              ]),
-            },
-          });
-        })
-    );
+async function main() {
+  console.log("🌱 Starting seeding...");
 
-    // Generate 5 shelters
-    const shelters = await Promise.all(
-      Array(5)
-        .fill(null)
-        .map(async () => {
-          return await prisma.shelter.create({
-            data: {
-              name: faker.company.name(),
-              address: faker.location.streetAddress(),
-              city: faker.location.city(),
-              state: faker.location.state(),
-              zipCode: faker.location.zipCode(),
-              phone: faker.phone.number(),
-              email: faker.internet.email(),
-              website: faker.internet.url(),
-              imageId: faker.helpers.arrayElement([
-                ...images.map((img) => img.id),
-                null,
-              ]),
-              ownerId: faker.helpers.arrayElement([
-                ...users.map((user) => user.id),
-                null,
-              ]),
-            },
-          });
-        })
-    );
+  // Create Images first (for avatar and pet images)
+  console.log("Creating images...");
+  const images = await Promise.all(
+    Array(30)
+      .fill(null)
+      .map(async () => {
+        return prisma.image.create({
+          data: {
+            url: faker.image.url(),
+            key: faker.string.uuid(),
+            bucket: "petconnect-images",
+            fileType: faker.helpers.arrayElement(["image/jpeg", "image/png"]),
+            fileSize: faker.number.int({ min: 100000, max: 5000000 }),
+          },
+        });
+      })
+  );
 
-    // Generate 20 pets
-    const pets = await Promise.all(
-      Array(20)
-        .fill(null)
-        .map(async () => {
-          const pet = await prisma.pet.create({
-            data: {
-              name: faker.person.firstName(),
-              species: faker.helpers.arrayElement([
-                "Dog",
-                "Cat",
-                "Bird",
-                "Rabbit",
-              ]),
-              breed: faker.lorem.word(),
-              gender: faker.helpers.arrayElement(["Male", "Female"]),
-              birthDate: faker.date.past({ years: 5 }),
-              size: faker.helpers.arrayElement(["Small", "Medium", "Large"]),
-              color: faker.color.human(),
-              description: faker.lorem.paragraph(),
-              adoptionStatus: getRandomEnumValue(AdoptionStatus),
-              ownerId: faker.helpers.arrayElement([
-                ...users.map((user) => user.id),
-                null,
-              ]),
-              shelterId: faker.helpers.arrayElement([
-                ...shelters.map((shelter) => shelter.id),
-                null,
-              ]),
-            },
-          });
+  // Create Avatar Images
+  console.log("Creating avatar images...");
+  const avatarImages = await Promise.all(
+    images.slice(0, 15).map(async (image) => {
+      return prisma.avatarImage.create({
+        data: {
+          imageId: image.id,
+        },
+      });
+    })
+  );
 
-          // Add random images to pets
-          await prisma.pet.update({
-            where: { id: pet.id },
-            data: {
-              images: {
-                connect: faker.helpers
-                  .arrayElements(images, faker.number.int({ min: 1, max: 3 }))
-                  .map((img: { id: string }) => ({ id: img.id })),
+  // Create Users
+  console.log("Creating users...");
+  const users = await Promise.all(
+    Array(20)
+      .fill(null)
+      .map(async (_, index) => {
+        const avatarImage = index < 10 ? avatarImages[index] : null;
+        return prisma.user.create({
+          data: {
+            firstName: faker.person.firstName(),
+            lastName: faker.person.lastName(),
+            username: faker.internet.username(),
+            email: faker.internet.email(),
+            passwordHash: await hash("password123", 10),
+            avatarImageId: avatarImage?.id,
+          },
+        });
+      })
+  );
+
+  // Create Shelters
+  console.log("Creating shelters...");
+  const shelters = await Promise.all(
+    Array(10)
+      .fill(null)
+      .map(async (_, index) => {
+        const avatarImage = avatarImages[index + 10];
+        const lat = Number(faker.location.latitude());
+        const lng = Number(faker.location.longitude());
+
+        return prisma.shelter.create({
+          data: {
+            name: faker.company.name(),
+            description: faker.company.catchPhrase(),
+            phone: faker.phone.number(),
+            email: faker.internet.email(),
+            website: faker.internet.url(),
+            ownerId: users[index].id,
+            avatarImageId: avatarImage?.id,
+            address: {
+              create: {
+                address1: faker.location.streetAddress(),
+                address2: faker.location.secondaryAddress(),
+                formattedAddress: faker.location.streetAddress(true),
+                city: faker.location.city(),
+                region: faker.location.state(),
+                postalCode: faker.location.zipCode(),
+                country: faker.location.country(),
+                lat,
+                lng,
               },
             },
-          });
+          },
+        });
+      })
+  );
 
-          return pet;
-        })
-    );
-
-    // Generate 15 bookmarks
-    await Promise.all(
-      Array(15)
-        .fill(null)
-        .map(async () => {
-          return await prisma.bookmark.create({
+  // Create Shelter Members
+  console.log("Creating shelter members...");
+  await Promise.all(
+    shelters.map(async (shelter) => {
+      const memberCount = faker.number.int({ min: 2, max: 5 });
+      const members = getRandomItems(users, memberCount, memberCount);
+      return Promise.all(
+        members.map(async (user) => {
+          return prisma.shelterMember.create({
             data: {
-              userId: faker.helpers.arrayElement(users.map((user) => user.id)),
-              petId: faker.helpers.arrayElement(pets.map((pet) => pet.id)),
+              shelterId: shelter.id,
+              userId: user.id,
             },
           });
         })
-    );
+      );
+    })
+  );
 
-    // Generate 30 messages
-    await Promise.all(
-      Array(30)
-        .fill(null)
-        .map(async () => {
-          const isShelterSender = faker.datatype.boolean();
-          const isShelterReceiver = faker.datatype.boolean();
+  // Create Pets
+  console.log("Creating pets...");
+  const petSpecies = ["Dog", "Cat", "Rabbit", "Bird", "Hamster"];
+  const petStatus = [PetStatus.AVAILABLE, PetStatus.ADOPTED, PetStatus.PENDING];
+  const pets = await Promise.all(
+    Array(30)
+      .fill(null)
+      .map(async () => {
+        const species = randomItem(petSpecies);
+        const shelter = randomItem(shelters);
+        const creator = randomItem(users);
 
-          return await prisma.message.create({
+        return prisma.pet.create({
+          data: {
+            name: faker.animal.dog(),
+            description: faker.lorem.paragraph(),
+            species,
+            breed: faker.animal.dog(),
+            gender: faker.person.sex(),
+            birthDate: faker.date.past(),
+            status: randomItem(petStatus),
+            createdByUserId: creator.id,
+            shelterId: shelter.id,
+          },
+        });
+      })
+  );
+
+  // Create Pet Images
+  console.log("Creating pet images...");
+  await Promise.all(
+    pets.map(async (pet) => {
+      const imageCount = faker.number.int({ min: 1, max: 3 });
+
+      // Create new images for each pet
+      const petImages = await Promise.all(
+        Array(imageCount)
+          .fill(null)
+          .map(async () => {
+            return prisma.image.create({
+              data: {
+                url: faker.image.url(),
+                key: faker.string.uuid(),
+                bucket: "petconnect-images",
+                fileType: faker.helpers.arrayElement([
+                  "image/jpeg",
+                  "image/png",
+                ]),
+                fileSize: faker.number.int({ min: 100000, max: 5000000 }),
+              },
+            });
+          })
+      );
+
+      return Promise.all(
+        petImages.map(async (image, index) => {
+          return prisma.petImage.create({
             data: {
-              content: faker.lorem.paragraph(),
-              senderUserId: isShelterSender
-                ? null
-                : faker.helpers.arrayElement(users.map((user) => user.id)),
-              senderShelterId: isShelterSender
-                ? faker.helpers.arrayElement(
-                    shelters.map((shelter) => shelter.id)
-                  )
-                : null,
-              receiverUserId: isShelterReceiver
-                ? null
-                : faker.helpers.arrayElement(users.map((user) => user.id)),
-              receiverShelterId: isShelterReceiver
-                ? faker.helpers.arrayElement(
-                    shelters.map((shelter) => shelter.id)
-                  )
-                : null,
-              petId: faker.helpers.arrayElement([
-                ...pets.map((pet) => pet.id),
-                null,
-              ]),
+              petId: pet.id,
+              imageId: image.id,
+              isPrimary: index === 0,
             },
           });
         })
-    );
+      );
+    })
+  );
 
-    console.log("Dummy data generated successfully!");
-  } catch (error) {
-    console.error("Error generating dummy data:", error);
-  } finally {
-    await prisma.$disconnect();
-  }
+  // Create Bookmarks
+  console.log("Creating bookmarks...");
+  await Promise.all(
+    users.map(async (user) => {
+      const bookmarkedPets = getRandomItems(pets, 1, 5);
+      return Promise.all(
+        bookmarkedPets.map(async (pet) => {
+          return prisma.bookmark.create({
+            data: {
+              userId: user.id,
+              petId: pet.id,
+            },
+          });
+        })
+      );
+    })
+  );
+
+  // Create Messages
+  console.log("Creating messages...");
+  const messages = await Promise.all(
+    Array(40)
+      .fill(null)
+      .map(async () => {
+        const sender = randomItem(users);
+        const receiver = randomItem(users.filter((u) => u.id !== sender.id));
+        const shelter = Math.random() > 0.5 ? randomItem(shelters) : null;
+
+        return prisma.message.create({
+          data: {
+            senderId: sender.id,
+            receiverId: receiver.id,
+            content: faker.lorem.paragraph(),
+            isRead: faker.datatype.boolean(),
+            shelterId: shelter?.id,
+          },
+        });
+      })
+  );
+
+  // Create Message Assignments
+  console.log("Creating message assignments...");
+  await Promise.all(
+    messages
+      .filter(() => Math.random() > 0.7)
+      .map(async (message) => {
+        const assignedUser = randomItem(users);
+        return prisma.shelterMessageAssignment.create({
+          data: {
+            messageId: message.id,
+            userId: assignedUser.id,
+          },
+        });
+      })
+  );
+
+  console.log("✅ Seeding completed!");
 }
 
-// Run the generator
-generateDummyData();
+main()
+  .catch((e) => {
+    console.error("Error during seeding:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
