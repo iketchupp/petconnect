@@ -1,44 +1,37 @@
 package org.petconnect.backend.model;
 
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 @Entity
-@Table(name = "message")
+@Table(name = "shelter_message_assignment")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ShelterMessageAssignment {
-
+    
     @Id
-    @Builder.Default
-    @Column(name = "message_id")
-    private UUID messageId = UUID.randomUUID();
-
-    @Column(name = "user_id")
-    private String userId;
-
+    @Column(name = "message_id", columnDefinition = "uuid")
+    private UUID messageId;
+    
+    @Column(name = "user_id", nullable = false, columnDefinition = "uuid")
+    private UUID userId;
+    
     @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime assignedAt = LocalDateTime.now();
-
-    //Relationships
-
+    @Column(name = "assigned_at", nullable = false, updatable = false)
+    private LocalDateTime assignedAt;
+    
+    // Relationships
     @OneToOne
     @JoinColumn(name = "message_id", insertable = false, updatable = false)
     private Message message;
-
+    
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
-
 }

@@ -1,48 +1,40 @@
 package org.petconnect.backend.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "avatar_image")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class AvatarImage {
-
+    
     @Id
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
-
-    @Column(unique = true,name = "image_id")
-    private String imageId;
-
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
+    
+    @Column(name = "image_id", nullable = false, columnDefinition = "uuid")
+    private UUID imageId;
+    
     @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    //Relationships
-
-    @OneToMany
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    // Relationships
+    @OneToOne
     @JoinColumn(name = "image_id", insertable = false, updatable = false)
-    private List<Image> images;
-
+    private Image image;
+    
     @OneToOne(mappedBy = "avatarImage")
-    @JoinColumn(nullable = true)
     private User user;
-
+    
     @OneToOne(mappedBy = "avatarImage")
-    @JoinColumn(nullable = true)
     private Shelter shelter;
-}
+} 

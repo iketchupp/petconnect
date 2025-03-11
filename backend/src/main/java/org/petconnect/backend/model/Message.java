@@ -1,61 +1,58 @@
 package org.petconnect.backend.model;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "message")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Message {
-
+    
     @Id
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
-
-    @Column(name = "sender_id")
-    private String senderId;
-
-    @Column(name = "receiver_id")
-    private String receiverId;
-
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
+    
+    @Column(name = "sender_id", nullable = false, columnDefinition = "uuid")
+    private UUID senderId;
+    
+    @Column(name = "receiver_id", nullable = false, columnDefinition = "uuid")
+    private UUID receiverId;
+    
+    @Column(name = "content", nullable = false)
     private String content;
-
-    @Column(name = "is_read")
-    private boolean isRead = false;
-
-    @Column(nullable = true, name = "shelter_id")
-    private String shelterId;
-
+    
+    @Builder.Default
+    @Column(name = "is_read", nullable = false)
+    private Boolean isRead = false;
+    
+    @Column(name = "shelter_id", columnDefinition = "uuid")
+    private UUID shelterId;
+    
     @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    //Relationships
-
+    @Column(name = "sent_at", nullable = false, updatable = false)
+    private LocalDateTime sentAt;
+    
+    // Relationships
     @ManyToOne
     @JoinColumn(name = "sender_id", insertable = false, updatable = false)
     private User sender;
-
+    
     @ManyToOne
     @JoinColumn(name = "receiver_id", insertable = false, updatable = false)
     private User receiver;
-
+    
     @ManyToOne
-    @JoinColumn(name = "shelter_id", nullable = true, insertable = false, updatable = false)
+    @JoinColumn(name = "shelter_id", insertable = false, updatable = false)
     private Shelter shelter;
-
-    @OneToOne(mappedBy = "message")
-    @JoinColumn(nullable = true)
+    
+    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL)
     private ShelterMessageAssignment assignment;
 }

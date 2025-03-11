@@ -1,7 +1,10 @@
 package org.petconnect.backend.model;
 
+/**
+ * Enum representing the possible statuses of a pet.
+ */
 public enum PetStatus {
-    AVALIABLE,
+    AVAILABLE,
     ADOPTED,
     PENDING
 }

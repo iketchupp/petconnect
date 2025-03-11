@@ -1,79 +1,76 @@
 package org.petconnect.backend.model;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
-
-import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "shelter")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Shelter {
-
+    
     @Id
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
-
-    @Column(length = 100)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false, columnDefinition = "uuid")
+    private UUID id;
+    
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
-
-    @Column(nullable = true)
+    
+    @Column(name = "description")
     private String description;
-
-    @Column(nullable = true)
-    private String phoneNumber;
-
-    @Column(nullable = true)
+    
+    @Column(name = "phone")
+    private String phone;
+    
+    @Column(name = "email")
     private String email;
-
-    @Column(nullable = true)
+    
+    @Column(name = "website")
     private String website;
-
-    @Column(name = "owner_id")
-    private String ownerId;
-
-    @Column(unique = true, name = "avatar_image_id", nullable = true)
-    private String avatarImageId;
-
-    @Column(name = "address_id", nullable = true)
-    private String addressId;
-
+    
+    @Column(name = "owner_id", nullable = false, columnDefinition = "uuid")
+    private UUID ownerId;
+    
+    @Column(name = "avatar_image_id", columnDefinition = "uuid")
+    private UUID avatarImageId;
+    
+    @Column(name = "address_id", columnDefinition = "uuid")
+    private UUID addressId;
+    
     @CreationTimestamp
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
-
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
     // Relationships
-
     @ManyToOne
-    @JoinColumn(name = "owner_id",insertable = false, updatable = false)
+    @JoinColumn(name = "owner_id", insertable = false, updatable = false)
     private User owner;
-
+    
     @OneToOne
-    @JoinColumn(name = "avatar_image_id", nullable = true, insertable = false, updatable = false)
+    @JoinColumn(name = "avatar_image_id", insertable = false, updatable = false)
     private AvatarImage avatarImage;
-
-    @OneToOne(mappedBy = "shelters")
-    @JoinColumn(nullable = false)
+    
+    @OneToOne(mappedBy = "shelters", cascade = CascadeType.ALL)
     private Address address;
-
-    @OneToMany(mappedBy = "shelter")
-    private List<ShelterMember> members;
-
-    @OneToMany(mappedBy = "shelter")
-    private List<Pet> pets;
-
-    @OneToMany(mappedBy = "shelter")
-    private List<Message> messages;
+    
+    @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<ShelterMember> members = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Pet> pets = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "shelter", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Message> messages = new ArrayList<>();
 }
-
-
