@@ -2,9 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { login } from '@/actions/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
@@ -21,6 +23,8 @@ const formSchema = z.object({
 
 export function LoginForm({ className, ...props }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -29,8 +33,33 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+      const response = await login(values);
+
+      if ('error' in response) {
+        // Handle validation errors
+        if (response.validationErrors?.length > 0) {
+          response.validationErrors.forEach((error) => {
+            form.setError(error.field as any, {
+              message: error.message,
+            });
+          });
+          return;
+        }
+
+        // Handle other errors
+        toast.error('Something went wrong. Please try again.');
+        return;
+      }
+
+      // Success case will automatically redirect
+    } catch (error) {
+      toast('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -98,8 +127,8 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Login'}
           </Button>
 
           <div>

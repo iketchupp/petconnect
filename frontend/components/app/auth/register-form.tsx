@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { register } from '@/actions/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
@@ -51,6 +53,8 @@ const formSchema = z
 
 export function RegisterForm({ className, ...props }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,8 +67,38 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+
+      const response = await register({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        username: values.username,
+        email: values.email,
+        password: values.password,
+      });
+
+      if ('error' in response) {
+        // Handle validation errors
+        if (response.validationErrors?.length > 0) {
+          response.validationErrors.forEach((error) => {
+            form.setError(error.field as any, {
+              message: error.message,
+            });
+          });
+          return;
+        }
+
+        // Handle other errors
+        toast.error('Something went wrong. Please try again.');
+        return;
+      }
+    } catch (error) {
+      toast('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -178,8 +212,8 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Register
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Registering...' : 'Register'}
           </Button>
 
           <div>
