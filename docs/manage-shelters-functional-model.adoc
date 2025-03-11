@@ -1,0 +1,445 @@
+=== PetConnect - Team Members
+
+* Attila Hürkecz
+* Judit Hruska
+* László Kovács
+
+
+= Shelter Management - Functional Model
+
+== Description
+
+Logged-in users can list, view, modify, and delete shelters in the system.
+
+== Use Cases
+
+=== Use Case Diagram
+
+=== Brief Description of Use Cases
+==== List Shelters
+[cols="1h,3"]
+|===
+| Identifier
+| UC_S_List
+
+| Trigger Event
+| User wants to list shelters
+
+| Users
+| General User, Administrator
+
+| Primary Flow
+|
+1. User clicks on the List Shelters menu item
+
+2. System filters and retrieves shelters
+
+| Exceptions and Alternatives
+| -
+
+| Post-condition
+| List of shelters is generated in the system
+
+| Result
+| User sees the list of shelters and can select one from them
+
+| Use Case Realization
+| Technical model
+|===
+
+==== Create Shelter
+[cols="1h,3"]
+|===
+| Identifier
+| UC_S_Create
+
+| Trigger Event
+| User wants to create a new shelter
+
+| Users
+| General User, Administrator
+
+| Primary Flow
+|
+1. User provides necessary data for shelter creation
+
+2. Initiates the creation process
+
+3. New shelter is registered in the system
+
+| Exceptions and Alternatives
+| (E.3. A shelter with the given name already exists in the system)
+
+| Post-condition
+| Shelter is registered in the system
+
+(E.3. Registration fails, user is notified of the error)
+
+| Result
+| The newly registered shelter is available to the user in the system
+
+| Use Case Realization
+| Technical model
+|===
+
+==== View Shelter
+[cols="1h,3"]
+|===
+| Identifier
+| UC_S_Read
+
+| Trigger Event
+| User wants to view selected shelter's details
+
+| Users
+| General User, Administrator
+
+| Primary Flow
+|
+1. User selects the shelter
+
+2. System retrieves the selected shelter's information
+
+| Exceptions and Alternatives
+| -
+
+| Post-condition
+| Shelter information is retrieved from the system
+
+| Result
+| User sees the selected shelter's details
+
+| Use Case Realization
+| Technical model
+|===
+
+==== Update Shelter
+[cols="1h,3"]
+|===
+| Identifier
+| UC_S_Update
+
+| Trigger Event
+| User wants to modify selected shelter's details
+
+| Users
+| General User, Administrator
+
+| Primary Flow
+|
+1. User provides the data to be modified
+
+2. Initiates the update process
+
+3. Shelter is updated in the system
+
+| Exceptions and Alternatives
+| -
+
+| Post-condition
+| Shelter is updated in the system
+
+| Result
+| User sees the shelter's updated details
+
+| Use Case Realization
+| Technical model
+|===
+
+==== Delete Shelter
+[cols="1h,3"]
+|===
+| Identifier
+| UC_S_Delete
+
+| Trigger Event
+| User wants to delete the selected shelter from the system
+
+| Users
+| General User, Administrator
+
+| Primary Flow
+|
+1. User initiates the deletion process
+
+2. System deletes the shelter
+
+| Exceptions and Alternatives
+| (E.2. The shelter has associated animals, cannot be deleted)
+
+| Post-condition
+| Shelter is deleted from the system
+
+(E.2. Shelter is not deleted, user is notified)
+
+| Result
+| User no longer sees the deleted shelter's details
+
+| Use Case Realization
+| Technical model
+|===
+
+== Permissions
+
+[cols="1,1,1"]
+|===
+| Use Case | Permission | Roles
+
+| List Shelters
+| SHELTER_LIST
+| General User, Administrator
+
+| Create Shelter
+| SHELTER_CREATE
+| General User, Administrator
+
+| View Shelter
+| SHELTER_READ
+| General User, Administrator
+
+| Update Shelter
+| SHELTER_UPDATE
+| General User, Administrator
+
+| Delete Shelter
+| SHELTER_DELETE
+| Administrator
+|===
+
+== Interface Design
+
+=== List Shelters Interface
+
+==== Design
+
+design plan image needed here ...
+
+==== Interface Fields
+
+[cols="1,1,1,1,1"]
+|===
+| Name | Type | Required? | Editable? | Display
+
+| Shelter Name
+| Text input field
+| N
+| Y
+| Filter section
+
+| Location
+| Text input field
+| N
+| Y
+| Filter section
+
+| Shelter Name
+| Label
+| -
+| -
+| Results list section
+
+| Location
+| Label
+| -
+| -
+| Results list section
+
+| Phone Number
+| Label
+| -
+| -
+| Results list section
+
+| Email
+| Label
+| -
+| -
+| Results list section
+|===
+
+==== Available Operations
+
+[cols="1,1,1"]
+|===
+| Event | Description | Permission
+
+| Click on Search button
+| Executes the List Shelters use case. Selected shelters appear in the results list.
+| SHELTER_LIST
+
+| Click on View button
+| Executes the View Shelter use case. User is taken to the view interface.
+| SHELTER_READ
+|===
+
+=== Create or Edit Shelter Interface
+
+==== Design
+
+design plan image needed here ...
+
+==== Interface Fields
+
+[cols="1,1,1,1,1"]
+|===
+| Name | Type | Required | Editable | Validation
+
+| Name
+| Text input field
+| Y
+| Y
+| -
+
+| Description
+| Multiline text field
+| N
+| Y
+| -
+
+| Location
+| Text input field
+| Y
+| Y
+| -
+
+| Phone Number
+| Text input field
+| Y
+| Y
+| Phone number format
+
+| Email
+| Text input field
+| Y
+| Y
+| Email format
+
+| Image URL
+| Text input field
+| N
+| Y
+| URL format
+
+| Website
+| Text input field
+| N
+| Y
+| URL format
+
+| Facebook
+| Text input field
+| N
+| Y
+| URL format
+
+| Twitter
+| Text input field
+| N
+| Y
+| URL format
+
+| Instagram
+| Text input field
+| N
+| Y
+| URL format
+|===
+
+==== Available Operations
+[cols="1,1,1,1"]
+|===
+| Event | Description | Interface | Permission
+
+| Click on Save button
+| Executes the Create Shelter use case. User is taken to the view shelter interface.
+
+Button remains DISABLED until the form is valid
+| Create Shelter interface
+| SHELTER_CREATE
+
+| Click on Save button
+| Executes the Update Shelter use case. User is taken to the view shelter interface.
+
+Button remains DISABLED until the form is valid
+| Edit Shelter interface
+| SHELTER_UPDATE
+|===
+
+=== View Shelter Interface
+
+==== Design
+
+design plan image needed here ...
+
+==== Interface Fields
+
+[cols="1,1"]
+|===
+| Name | Type
+
+| Name
+| Text label
+
+| Description
+| Multiline text label
+
+| Location
+| Text label
+
+| Phone Number
+| Text label
+
+| Email
+| Text label
+
+| Image
+| Image viewer
+
+| Website
+| Link
+
+| Facebook
+| Link
+
+| Twitter
+| Link
+
+| Instagram
+| Link
+
+| Creation Date
+| Date label
+
+| Last Modified Date
+| Date label
+|===
+
+==== Available Operations
+[cols="1,1,1"]
+|===
+| Event | Description | Permission
+
+| Click on Edit button
+| User is taken to the edit shelter interface.
+| SHELTER_UPDATE
+
+| Click on Delete button
+| A dialog appears.
+
+Title: Delete
+
+Message: Are you sure you want to delete the selected shelter?
+
+Clicking No closes the dialog
+
+Clicking Yes executes the Delete Shelter use case.
+User is taken to the list shelters interface.
+
+(If deletion fails, the following error messages may appear:
+
+1.
+error message: DELETE_FORBIDDEN
+
+notification text: "The shelter cannot be deleted because it has associated animals")
+| SHELTER_DELETE
+|===
