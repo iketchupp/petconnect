@@ -1,8 +1,3 @@
-import Link from 'next/link';
-import { GalleryVerticalEnd } from 'lucide-react';
-
-import { siteConfig } from '@/config/site.config';
-
 export function AuthContainer({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1">
