@@ -36,3 +36,4 @@ build/
 config.yml
 api.yml
 *.env
+securitypassword.txt
