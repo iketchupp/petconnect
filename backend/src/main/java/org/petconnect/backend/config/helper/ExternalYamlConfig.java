@@ -13,7 +13,4 @@ import org.springframework.context.annotation.PropertySources;
     // Classpath resource locations (for development in resources directory)
     @PropertySource(value = "classpath:config.yml", factory = YamlPropertySourceFactory.class, ignoreResourceNotFound = true),
 })
-public class ExternalYamlConfig {
-    // This class serves as a container for the PropertySource annotations
-    // No additional code is needed here
-} 
+public class ExternalYamlConfig {} 

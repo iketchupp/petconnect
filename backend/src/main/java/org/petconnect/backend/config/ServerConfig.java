@@ -15,7 +15,6 @@ public class ServerConfig implements WebServerFactoryCustomizer<ConfigurableWebS
 
     @Override
     public void customize(ConfigurableWebServerFactory factory) {
-        // Set server port from YAML config if available
         if (yamlConfig.getServer() != null && yamlConfig.getServer().getPort() > 0) {
             factory.setPort(yamlConfig.getServer().getPort());
         }
