@@ -5,14 +5,13 @@ import org.springframework.boot.web.server.ConfigurableWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class ServerConfig implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
     private final YamlConfig yamlConfig;
-
-    public ServerConfig(YamlConfig yamlConfig) {
-        this.yamlConfig = yamlConfig;
-    }
 
     @Override
     public void customize(ConfigurableWebServerFactory factory) {

@@ -13,6 +13,7 @@ import lombok.Data;
 public class YamlConfig {
 
     private Database database;
+    private Storage storage;
     private Server server;
     private Frontend frontend;
     private Jwt jwt;
@@ -30,6 +31,21 @@ public class YamlConfig {
             private String username;
             private String password;
             private String database;
+        }
+    }
+
+    @Data
+    public static class Storage {
+
+        private S3 s3;
+
+        @Data
+        public static class S3 {
+            private String endpoint;
+            private String region;
+            private String accessKey;
+            private String secretKey;
+            private String bucket;
         }
     }
 

@@ -8,14 +8,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class DatabaseConfig {
 
     private final YamlConfig yamlConfig;
-
-    public DatabaseConfig(YamlConfig yamlConfig) {
-        this.yamlConfig = yamlConfig;
-    }
 
     @Bean
     @Primary
