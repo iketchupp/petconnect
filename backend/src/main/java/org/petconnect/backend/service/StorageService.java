@@ -1,6 +1,5 @@
 package org.petconnect.backend.service;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import org.petconnect.backend.config.helper.YamlConfig;

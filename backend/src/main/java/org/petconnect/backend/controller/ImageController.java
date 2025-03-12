@@ -1,7 +1,5 @@
 package org.petconnect.backend.controller;
 
-import java.io.IOException;
-
 import org.petconnect.backend.dto.file.FileResponse;
 import org.petconnect.backend.service.StorageService;
 import org.springframework.http.ResponseEntity;
