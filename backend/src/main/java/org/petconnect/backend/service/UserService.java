@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+    
     public Optional<User> getUser(String v) {
         return userRepository.findByEmail(v)
                 .map(user -> {
