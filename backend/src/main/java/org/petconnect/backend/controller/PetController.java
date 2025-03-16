@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/pets")
 @RequiredArgsConstructor
-@Tag(name = "Pets", description = "Pet management APIs")
+@Tag(name = "Pets", description = "Endpoints for managing pets")
 public class PetController {
 
     private final PetService petService;

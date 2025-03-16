@@ -22,7 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/shelters")
 @RequiredArgsConstructor
-@Tag(name = "Shelters", description = "Endpoints for managing animal shelters")
+@Tag(name = "Shelters", description = "Endpoints for managing shelters")
 public class ShelterController {
     private final ShelterService shelterService;
 

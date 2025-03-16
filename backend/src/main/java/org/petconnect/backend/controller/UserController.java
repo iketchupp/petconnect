@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
-@Tag(name = "User", description = "User management APIs")
+@Tag(name = "User", description = "Endpoints for managing user")
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
