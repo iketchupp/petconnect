@@ -1,5 +1,6 @@
 package org.petconnect.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -13,6 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"pet", "image"})
+@EqualsAndHashCode(exclude = {"pet", "image"})
 public class PetImage {
     
     @Id
@@ -35,11 +38,12 @@ public class PetImage {
     private LocalDateTime createdAt;
     
     // Relationships
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", insertable = false, updatable = false)
+    @JsonBackReference
     private Pet pet;
     
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "image_id", insertable = false, updatable = false)
     private Image image;
 }

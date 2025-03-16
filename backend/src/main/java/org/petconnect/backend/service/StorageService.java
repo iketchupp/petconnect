@@ -10,6 +10,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +51,15 @@ public class StorageService {
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String objectName = UUID.randomUUID() + extension;
             
+            return uploadFileWithObjectName(file, objectName);
+        } catch (Exception e) {
+            log.error("Error uploading file: {}", e.getMessage());
+            throw new RuntimeException("Error uploading file to MinIO", e);
+        }
+    }
+
+    public String uploadFileWithObjectName(MultipartFile file, String objectName) {
+        try {
             // Upload the file
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -60,11 +70,29 @@ public class StorageService {
                             .build()
             );
             
-            log.info("File '{}' uploaded successfully with object name '{}'", originalFilename, objectName);
+            log.info("File '{}' uploaded successfully with object name '{}'", file.getOriginalFilename(), objectName);
             return objectName;
         } catch (Exception e) {
             log.error("Error uploading file: {}", e.getMessage());
             throw new RuntimeException("Error uploading file to MinIO", e);
+        }
+    }
+
+    /**
+     * Delete a file from MinIO
+     */
+    public void deleteFile(String objectName) {
+        try {
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(getBucketName())
+                    .object(objectName)
+                    .build()
+            );
+            log.info("File '{}' deleted successfully", objectName);
+        } catch (Exception e) {
+            log.error("Error deleting file: {}", e.getMessage());
+            throw new RuntimeException("Error deleting file from MinIO", e);
         }
     }
 }

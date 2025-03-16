@@ -36,16 +36,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return SecurityPaths.PUBLIC_PATHS.stream()
-            .anyMatch(path -> pathMatcher.match(path, request.getServletPath()));
+        return SecurityPaths.PUBLIC_ENDPOINTS.stream()
+                .anyMatch(endpoint -> {
+                    boolean pathMatches = pathMatcher.match(endpoint.path(), request.getServletPath());
+                    boolean methodMatches = endpoint.method() == null ||
+                            endpoint.method().toString().equals(request.getMethod());
+                    return pathMatches && methodMatches;
+                });
     }
 
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
-    ) throws ServletException, IOException {
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String userEmail;
@@ -61,16 +65,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                
+
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
                     authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                            new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
@@ -82,7 +84,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private void handleError(HttpServletResponse response, HttpStatus status, String message, String error) throws IOException {
+    private void handleError(HttpServletResponse response, HttpStatus status, String message, String error)
+            throws IOException {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
@@ -91,9 +94,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .status(status.value())
                 .error(error)
                 .message(message)
-                .path("/api/v1")  // We can't get the exact path in filter, so using base path
+                .path("/api/v1")
                 .build();
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);
     }
-} 
+}

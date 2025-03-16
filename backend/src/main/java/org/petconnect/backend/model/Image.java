@@ -13,6 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"avatarImage", "petImage"})
+@EqualsAndHashCode(exclude = {"avatarImage", "petImage"})
 public class Image {
     
     @Id
@@ -40,9 +42,9 @@ public class Image {
     private LocalDateTime uploadedAt;
     
     // Relationships
-    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private AvatarImage avatarImage;
     
-    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private PetImage petImage;
 } 

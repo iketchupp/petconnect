@@ -1,9 +1,11 @@
 package org.petconnect.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"creator", "shelter", "petImages"})
+@EqualsAndHashCode(exclude = {"creator", "shelter", "petImages"})
 public class Pet {
     
     @Id
@@ -38,7 +42,7 @@ public class Pet {
     private String gender;
     
     @Column(name = "birth_date", nullable = false)
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
     
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -56,16 +60,17 @@ public class Pet {
     private LocalDateTime createdAt;
     
     // Relationships
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id", insertable = false, updatable = false)
     private User creator;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shelter_id", insertable = false, updatable = false)
     private Shelter shelter;
     
-    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @JsonManagedReference
     private List<PetImage> petImages = new ArrayList<>();
     
     @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
