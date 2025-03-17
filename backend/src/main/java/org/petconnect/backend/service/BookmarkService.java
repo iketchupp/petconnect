@@ -63,4 +63,11 @@ public class BookmarkService {
 
         bookmarkRepository.deleteById(bookmarkId);
     }
+
+    public boolean isPetBookmarked(UUID petId) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDTO currentUser = userService.getUser(userEmail);
+        Bookmark.BookmarkId bookmarkId = new Bookmark.BookmarkId(currentUser.getId(), petId);
+        return bookmarkRepository.existsById(bookmarkId);
+    }
 }

@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.util.AntPathMatcher;
+import jakarta.servlet.http.Cookie;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -55,6 +56,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String userEmail;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            // Try to get token from cookies
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals(jwtService.getCookieName())) {
+                        jwt = cookie.getValue();
+                        try {
+                            userEmail = jwtService.extractUsername(jwt);
+                            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                                if (jwtService.isTokenValid(jwt, userDetails)) {
+                                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                            userDetails,
+                                            null,
+                                            userDetails.getAuthorities());
+                                    authToken.setDetails(
+                                            new WebAuthenticationDetailsSource().buildDetails(request));
+                                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                                }
+                            }
+                        } catch (ExpiredJwtException e) {
+                            handleError(response, HttpStatus.UNAUTHORIZED, "JWT token has expired", "Unauthorized");
+                        } catch (JwtException e) {
+                            handleError(response, HttpStatus.UNAUTHORIZED, "Invalid JWT token", "Unauthorized");
+                        }
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
+            }
             filterChain.doFilter(request, response);
             return;
         }

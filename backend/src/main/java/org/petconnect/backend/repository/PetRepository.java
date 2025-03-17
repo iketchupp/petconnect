@@ -68,4 +68,28 @@ public interface PetRepository extends JpaRepository<Pet, UUID> {
     List<String> findAllGenders();
 
     List<Pet> findByShelterIdOrderByCreatedAtDesc(UUID shelterId);
+
+    @Query(value = """
+            SELECT COUNT(*) FROM pet p
+            WHERE
+            (COALESCE(:species, p.species) IS NULL OR LOWER(p.species) = LOWER(COALESCE(:species, p.species)))
+            AND
+            (COALESCE(:breed, p.breed) IS NULL OR LOWER(p.breed) = LOWER(COALESCE(:breed, p.breed)))
+            AND
+            (COALESCE(:gender, p.gender) = p.gender)
+            AND
+            (p.birth_date <= COALESCE(CAST(:minDate AS timestamp), p.birth_date))
+            AND
+            p.status = 'AVAILABLE'
+            AND
+            (COALESCE(:searchQuery, '') = '' OR
+              LOWER(p.name::text) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+              (p.description IS NOT NULL AND LOWER(p.description::text) LIKE LOWER(CONCAT('%', :searchQuery, '%'))))
+            """, nativeQuery = true)
+    long countPetsByFilters(
+            @Param("species") String species,
+            @Param("breed") String breed,
+            @Param("gender") String gender,
+            @Param("minDate") LocalDateTime minDate,
+            @Param("searchQuery") String searchQuery);
 }

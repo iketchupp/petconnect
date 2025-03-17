@@ -64,6 +64,14 @@ public class PetService {
             minDate = calculateDateFromAge(filters.getAge());
         }
 
+        // Get total count of pets matching filters
+        long totalCount = petRepository.countPetsByFilters(
+                filters.getSpecies(),
+                filters.getBreed(),
+                filters.getGender(),
+                minDate,
+                filters.getSearchQuery());
+
         // Execute query with filters
         List<Pet> pets = petRepository.findPetsByFilters(
                 filters.getSpecies(),
@@ -98,6 +106,7 @@ public class PetService {
                 .pets(petDTOs)
                 .nextCursor(nextCursor)
                 .hasMore(hasMore)
+                .totalCount(totalCount)
                 .build();
     }
 
@@ -213,5 +222,44 @@ public class PetService {
         pet = petRepository.findById(petId).orElseThrow();
 
         return PetDTO.fromEntity(pet);
+    }
+
+    public UserDTO getPetOwner(UUID petId) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // If the pet belongs to a shelter, return the shelter owner
+        if (pet.getShelterId() != null) {
+            return UserDTO.fromEntity(pet.getShelter().getOwner());
+        }
+
+        // Otherwise return the user who created the pet
+        return UserDTO.fromEntity(pet.getCreator());
+    }
+
+    @Transactional
+    public void deletePet(UUID petId) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDTO currentUser = userService.getUser(userEmail);
+
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // Verify user has permission to delete the pet
+        boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
+                (pet.getShelterId() != null && pet.getShelter().getMembers().stream()
+                        .anyMatch(member -> member.getUserId().equals(currentUser.getId())));
+
+        if (!isAuthorized) {
+            throw new IllegalArgumentException("User is not authorized to delete this pet");
+        }
+
+        // Delete all associated pet images and their storage files
+        pet.getPetImages().forEach(petImage -> {
+            imageService.deleteImage(petImage.getImage().getKey());
+        });
+
+        // Delete the pet record
+        petRepository.delete(pet);
     }
 }

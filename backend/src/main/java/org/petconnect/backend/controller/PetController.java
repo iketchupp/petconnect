@@ -12,6 +12,7 @@ import org.petconnect.backend.dto.pet.CreatePetRequest;
 import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
 import org.petconnect.backend.dto.pet.PetsResponse;
+import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.service.PetService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -123,5 +124,31 @@ public class PetController {
             @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId,
             @Parameter(description = "Image files to upload", required = true) @RequestParam("files") List<MultipartFile> files) {
         return ResponseEntity.ok(petService.uploadPetImages(petId, files));
+    }
+
+    @Operation(summary = "Get pet owner", description = "Retrieves the owner details for a specific pet")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved pet owner"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @GetMapping("/{petId}/owner")
+    public ResponseEntity<UserDTO> getPetOwner(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
+        return ResponseEntity.ok(petService.getPetOwner(petId));
+    }
+
+    @Operation(summary = "Delete a pet", description = "Deletes a pet and its associated images. Only the pet owner or shelter members can delete the pet.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted pet"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not authorized to delete this pet"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{petId}")
+    public ResponseEntity<Void> deletePet(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
+        petService.deletePet(petId);
+        return ResponseEntity.noContent().build();
     }
 }

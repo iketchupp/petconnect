@@ -28,6 +28,7 @@ public final class SecurityPaths {
             PublicEndpoint.get("/api/v1/pets/species"),
             PublicEndpoint.get("/api/v1/pets/breeds"),
             PublicEndpoint.get("/api/v1/pets/genders"),
+            PublicEndpoint.get("/api/v1/pets/{id}/owner"),
             PublicEndpoint.get("/api/v1/shelters"),
             PublicEndpoint.get("/api/v1/shelters/{id}"),
             PublicEndpoint.get("/api/v1/shelters/{id}/pets"),

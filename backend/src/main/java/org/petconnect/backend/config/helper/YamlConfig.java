@@ -67,5 +67,6 @@ public class YamlConfig {
 
         private String secret;
         private long expirationMs = 7 * 24 * 60 * 60 * 1000; // 24 hours by default
+        private String cookieName;
     }
 }

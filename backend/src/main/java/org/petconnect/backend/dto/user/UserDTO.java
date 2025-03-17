@@ -41,7 +41,7 @@ public class UserDTO {
                 .lastName(user.getLastName())
                 .username(user.getUsername())
                 .email(user.getEmail())
-                .avatarUrl(user.getAvatarImage().getImage().getUrl())
+                .avatarUrl(user.getAvatarImage() != null ? user.getAvatarImage().getImage().getUrl() : null)
                 .build();
     }
 }

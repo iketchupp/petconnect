@@ -55,4 +55,14 @@ public class BookmarkController {
         bookmarkService.removeBookmark(petId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{petId}")
+    @Operation(summary = "Check if a pet is bookmarked", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bookmark status retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Boolean> isPetBookmarked(@PathVariable UUID petId) {
+        return ResponseEntity.ok(bookmarkService.isPetBookmarked(petId));
+    }
 }

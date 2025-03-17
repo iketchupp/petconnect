@@ -71,4 +71,8 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(yamlConfig.getJwt().getSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
-} 
+
+    public String getCookieName() {
+        return yamlConfig.getJwt().getCookieName();
+    }
+}
