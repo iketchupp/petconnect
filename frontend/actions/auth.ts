@@ -3,27 +3,23 @@
 import { cookies } from 'next/headers';
 import { redirect, RedirectType } from 'next/navigation';
 
-import { ErrorResponse } from '@/types/api';
+import { ErrorResponse, User } from '@/types/api';
 import { AuthResponse, UserLogin, UserRegister } from '@/types/auth';
 import { http } from '@/lib/http';
 
 export async function register(data: UserRegister): Promise<AuthResponse | ErrorResponse> {
-  let shouldRedirect = false;
-
   try {
     const response = await http.post('/auth/register', data);
 
     // If successful, store the token in cookies
     if (response.data.token) {
-      (await cookies()).set('token', response.data.token, {
+      (await cookies()).set('session_token', response.data.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
         maxAge: 30 * 24 * 60 * 60,
       });
-
-      shouldRedirect = true;
     }
 
     return response.data;
@@ -42,30 +38,22 @@ export async function register(data: UserRegister): Promise<AuthResponse | Error
       path: '/auth/register',
       validationErrors: [],
     };
-  } finally {
-    if (shouldRedirect) {
-      redirect('/');
-    }
   }
 }
 
 export async function login(data: UserLogin): Promise<AuthResponse | ErrorResponse> {
-  let shouldRedirect = false;
-
   try {
     const response = await http.post('/auth/login', data);
 
     // If successful, store the token in cookies
     if (response.data.token) {
-      (await cookies()).set('token', response.data.token, {
+      (await cookies()).set('session_token', response.data.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         path: '/',
         maxAge: 30 * 24 * 60 * 60,
       });
-
-      shouldRedirect = true;
     }
 
     return response.data;
@@ -84,9 +72,26 @@ export async function login(data: UserLogin): Promise<AuthResponse | ErrorRespon
       path: '/auth/login',
       validationErrors: [],
     };
-  } finally {
-    if (shouldRedirect) {
-      redirect('/');
-    }
+  }
+}
+
+export async function logout() {
+  const cookieStore = await cookies();
+  cookieStore.delete('session_token');
+  redirect('/');
+}
+
+export async function getSession() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('session_token');
+
+    if (!token) return null;
+
+    const response = await http.get<User>('/user/me');
+
+    return response.data;
+  } catch (error) {
+    return null;
   }
 }

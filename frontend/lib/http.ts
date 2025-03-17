@@ -8,7 +8,7 @@ export const http = axios.create({
 http.interceptors.request.use(async (config) => {
   if (typeof window === 'undefined') {
     const cookieStore = await (await import('next/headers')).cookies();
-    const token = cookieStore.get('token');
+    const token = cookieStore.get('session_token');
 
     if (token) {
       config.headers.Authorization = `Bearer ${token.value}`;

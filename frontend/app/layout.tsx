@@ -7,8 +7,6 @@ import { Providers } from '@/providers';
 
 import { siteConfig } from '@/config/site.config';
 import { cn } from '@/lib/utils';
-import { Footer } from '@/components/layout/footer';
-import { Header } from '@/components/layout/header';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -64,11 +62,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn('bg-background min-h-screen antialiased', geistSans.variable, geistMono.variable)}>
         <Providers>
-          <div className="absolute flex size-full min-h-screen flex-col">
-            <Header />
-            {children}
-            <Footer />
-          </div>
+          <div className="absolute flex size-full min-h-screen flex-col">{children}</div>
         </Providers>
       </body>
     </html>

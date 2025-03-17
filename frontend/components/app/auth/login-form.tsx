@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { login } from '@/actions/auth';
+import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -24,6 +26,9 @@ const formSchema = z.object({
 export function LoginForm({ className, ...props }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const initialize = useAuthStore((state) => state.initialize);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,8 +39,11 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    let shouldRedirect = false;
+
     try {
       setIsLoading(true);
+
       const response = await login(values);
 
       if ('error' in response) {
@@ -50,15 +58,19 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
         }
 
         // Handle other errors
-        toast.error('Something went wrong. Please try again.');
+        setError(response.message);
         return;
       }
 
-      // Success case will automatically redirect
+      shouldRedirect = true;
     } catch (error) {
       toast('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
+      if (shouldRedirect) {
+        initialize();
+        redirect('/');
+      }
     }
   };
 
@@ -126,6 +138,8 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
               </div>
             )}
           />
+
+          {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Logging in...' : 'Login'}

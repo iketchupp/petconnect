@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { register } from '@/actions/auth';
+import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -54,6 +56,9 @@ const formSchema = z
 export function RegisterForm({ className, ...props }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const initialize = useAuthStore((state) => state.initialize);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,6 +73,8 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    let shouldRedirect = false;
+
     try {
       setIsLoading(true);
 
@@ -91,13 +98,19 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
         }
 
         // Handle other errors
-        toast.error('Something went wrong. Please try again.');
+        setError(response.message);
         return;
       }
+
+      shouldRedirect = true;
     } catch (error) {
       toast('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
+      if (shouldRedirect) {
+        initialize();
+        redirect('/');
+      }
     }
   };
 
@@ -205,12 +218,31 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input {...field} id={field.name} type={showPassword ? 'text' : 'password'} />
+                  <div className="relative">
+                    <Input {...field} id={field.name} type={showPassword ? 'text' : 'password'} className="pr-10" />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 hover:cursor-pointer hover:bg-transparent"
+                      onClick={togglePasswordVisibility}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" aria-hidden="true" />
+                      ) : (
+                        <Eye className="size-4" aria-hidden="true" />
+                      )}
+                      <span className="sr-only">{showPassword ? 'Hide password' : 'Show password'}</span>
+                    </Button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Registering...' : 'Register'}

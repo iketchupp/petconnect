@@ -1,3 +1,6 @@
+export * from './user';
+export * from './pet';
+
 export interface ErrorResponse {
   timestamp: string;
   status: number;

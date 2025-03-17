@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PawPrint } from 'lucide-react';
 
 import { navConfig } from '@/config/nav.config';
 import { siteConfig } from '@/config/site.config';
@@ -14,7 +15,9 @@ export function MainNav() {
   return (
     <div className="mr-4 hidden md:flex">
       <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6">
-        <Icons.logo width={24} height={24} className="rounded" />
+        <div className="rounded-sm bg-white p-1">
+          <PawPrint className="size-4 text-black" />
+        </div>
         <span className="hidden font-bold lg:inline-block">{siteConfig.name}</span>
       </Link>
       <nav className="flex items-center gap-4 text-sm lg:gap-6">
