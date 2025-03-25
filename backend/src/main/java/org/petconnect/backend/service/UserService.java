@@ -69,30 +69,43 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
-        // If user already has an avatar, delete it
-        if (user.getAvatarImageId() != null) {
-            AvatarImage oldAvatar = avatarImageRepository.findById(user.getAvatarImageId())
-                    .orElseThrow(() -> new IllegalStateException("Avatar image not found"));
-
-            // Delete the old image from storage and database
-            imageService.deleteImage(oldAvatar.getImage().getKey());
-            avatarImageRepository.delete(oldAvatar);
-        }
-
-        // Upload the new avatar image
+        // Upload the new avatar image first
         FileResponse response = imageService.uploadImage(file,
                 "avatars/" + UUID.randomUUID() + "-" + file.getOriginalFilename());
         Image image = imageRepository.findByKey(response.getObjectName())
                 .orElseThrow(() -> new RuntimeException("Failed to find uploaded image"));
 
-        // Create new avatar image record
+        // Create new avatar image record and save it first
         AvatarImage newAvatar = AvatarImage.builder()
                 .imageId(image.getId())
                 .build();
         newAvatar = avatarImageRepository.save(newAvatar);
 
+        // Store old avatar information for cleanup
+        UUID oldAvatarId = user.getAvatarImageId();
+
         // Update user with new avatar
         user.setAvatarImageId(newAvatar.getId());
-        return userRepository.save(user);
+        // Clear any transient reference to prevent flush issues
+        user.setAvatarImage(null);
+        user = userRepository.save(user);
+
+        // Flush to ensure user update is committed
+        userRepository.flush();
+
+        // If user had an old avatar, delete it after the user reference has been
+        // updated
+        if (oldAvatarId != null) {
+            AvatarImage oldAvatar = avatarImageRepository.findById(oldAvatarId)
+                    .orElse(null);
+
+            if (oldAvatar != null) {
+                // Delete the old image from storage and database
+                imageService.deleteImage(oldAvatar.getImage().getKey());
+                avatarImageRepository.delete(oldAvatar);
+            }
+        }
+
+        return user;
     }
 }
