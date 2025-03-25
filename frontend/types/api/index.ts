@@ -1,5 +1,7 @@
 export * from './user';
 export * from './pet';
+export * from './address';
+export * from './shelter';
 
 export interface ErrorResponse {
   timestamp: string;
