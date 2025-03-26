@@ -31,6 +31,9 @@ public class UserDTO {
     @Schema(description = "User's email address", example = "john.smith@example.com")
     private String email;
 
+    @Schema(description = "User's full name (firstName + lastName)", example = "John Smith")
+    private String fullName;
+
     @Schema(description = "URL of the user's avatar image", example = "https://storage.example.com/avatars/user123.jpg")
     private String avatarUrl;
 
@@ -41,6 +44,7 @@ public class UserDTO {
                 .lastName(user.getLastName())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .fullName(user.getFirstName() + " " + user.getLastName())
                 .avatarUrl(user.getAvatarImage() != null ? user.getAvatarImage().getImage().getUrl() : null)
                 .build();
     }
