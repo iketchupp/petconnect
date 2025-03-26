@@ -58,8 +58,6 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const initialize = useAuthStore((state) => state.initialize);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -108,8 +106,7 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
     } finally {
       setIsLoading(false);
       if (shouldRedirect) {
-        initialize();
-        redirect('/');
+        redirect('/?login=success');
       }
     }
   };

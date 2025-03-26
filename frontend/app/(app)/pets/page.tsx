@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import type { PetFilters as PetFiltersType } from '@/actions/pets';
 
-import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from '@/components/ui/sidebar';
-import { PetFilters } from '@/components/pets/PetFilters';
-import { PetList } from '@/components/pets/PetList';
+import { PetFilters } from '@/components/app/pets/pet-filters';
+import { PetList } from '@/components/app/pets/pet-list';
 
 export default function PetsPage() {
   const [filters, setFilters] = useState<PetFiltersType>({});

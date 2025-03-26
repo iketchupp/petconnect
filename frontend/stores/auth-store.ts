@@ -12,7 +12,6 @@ interface AuthStore {
   setLoading: (isLoading: boolean) => void;
   isAuthenticated: () => boolean;
   reset: () => Promise<void>;
-  initialize: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -26,9 +25,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   reset: async () => {
     try {
       set({ isLoading: true });
-      // First clear the state
       set({ session: null, error: null });
-      // Then call the server action to clear the cookie and redirect
       await logout();
     } catch (error) {
       set({
@@ -39,19 +36,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
   isAuthenticated: () => {
     return !!get().session;
-  },
-  initialize: async () => {
-    try {
-      set({ isLoading: true, error: null });
-      const session = await getSession();
-      set({ session, isLoading: false });
-    } catch (error) {
-      console.error(error);
-      set({
-        error: error instanceof Error ? error.message : 'Failed to initialize session',
-        isLoading: false,
-      });
-    }
   },
   refresh: async () => {
     try {

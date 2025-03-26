@@ -6,9 +6,9 @@ import { useInView } from 'react-intersection-observer';
 
 import { PetsResponse } from '@/types/api';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/loading';
 
-import { Loading } from '../loading';
-import { PetCard } from './PetCard';
+import { PetCard } from './pet-card';
 
 interface PetListProps {
   filters: PetFilters;

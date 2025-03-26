@@ -2,9 +2,11 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuthStore } from '@/stores/auth-store';
 import { toast } from 'sonner';
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
+  const initialize = useAuthStore((state) => state.refresh);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -27,7 +29,7 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const login = searchParams.get('login');
     if (login) {
-      toast.success('You have been logged in.');
+      initialize();
       router.replace('/');
     }
   }, [searchParams]);

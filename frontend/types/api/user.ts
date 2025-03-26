@@ -2,6 +2,7 @@ export interface User {
   id: string; // UUID
   firstName: string;
   lastName: string;
+  fullName: string;
   username: string;
   email: string;
   avatarUrl?: string; // UUID, optional

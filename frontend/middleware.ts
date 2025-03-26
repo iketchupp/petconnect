@@ -26,7 +26,7 @@ export default async function middleware(request: NextRequest) {
     let session = useAuthStore.getState().session;
 
     if (isLoading && !session) {
-      await useAuthStore.getState().initialize();
+      await useAuthStore.getState().refresh();
       session = useAuthStore.getState().session;
     }
 

@@ -1,12 +1,12 @@
 import React, { Suspense } from 'react';
 
-import { Spinner } from '@/components/ui/kibo-ui/spinner';
 import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
+import { Loading } from '@/components/loading';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Suspense fallback={<Spinner variant="default" />}>
+    <Suspense fallback={<Loading />}>
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />

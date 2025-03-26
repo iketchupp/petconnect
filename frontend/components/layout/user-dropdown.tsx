@@ -47,7 +47,7 @@ export function UserDropdown({ children, side = 'right', sideOffset = 4, align =
               <AvatarFallback>{getAbbreviation(session.username)}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-semibold">{session.username}</span>
+              <span className="truncate font-semibold">{session.fullName}</span>
               <span className="truncate text-xs">{session.email}</span>
             </div>
           </div>

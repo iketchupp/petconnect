@@ -38,7 +38,6 @@ export function PetCard({ pet }: { pet: PetCardProps }) {
     mutationFn: bookmarkPet,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['petBookmark', pet.id] });
-      toast.success('Pet bookmarked successfully');
     },
     onError: () => {
       toast.error('Failed to bookmark pet');
@@ -49,7 +48,6 @@ export function PetCard({ pet }: { pet: PetCardProps }) {
     mutationFn: unBookmarkPet,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['petBookmark', pet.id] });
-      toast.success('Pet unbookmarked successfully');
     },
     onError: () => {
       toast.error('Failed to unbookmark pet');

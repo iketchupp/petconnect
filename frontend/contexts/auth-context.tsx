@@ -8,7 +8,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const initialize = useAuthStore((state) => state.initialize);
+  const initialize = useAuthStore((state) => state.refresh);
 
   useEffect(() => {
     initialize();
