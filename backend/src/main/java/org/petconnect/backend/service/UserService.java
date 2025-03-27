@@ -108,4 +108,28 @@ public class UserService {
 
         return user;
     }
+
+    @Transactional
+    public void removeAvatar(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        UUID avatarId = user.getAvatarImageId();
+        if (avatarId == null) {
+            throw new IllegalStateException("User has no avatar to remove");
+        }
+
+        // Get the avatar image record
+        AvatarImage avatar = avatarImageRepository.findById(avatarId)
+                .orElseThrow(() -> new IllegalStateException("Avatar image not found"));
+
+        // Update user to remove avatar reference
+        user.setAvatarImageId(null);
+        user.setAvatarImage(null);
+        userRepository.save(user);
+
+        // Delete the avatar image from storage and database
+        imageService.deleteImage(avatar.getImage().getKey());
+        avatarImageRepository.delete(avatar);
+    }
 }

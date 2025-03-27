@@ -65,4 +65,18 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return ResponseEntity.ok(userService.updateAvatar(authentication.getName(), file));
     }
+
+    @Operation(summary = "Remove avatar", description = "Remove the current user's avatar image")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully removed avatar"),
+            @ApiResponse(responseCode = "400", description = "User has no avatar to remove"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @DeleteMapping("/avatar")
+    public ResponseEntity<Void> removeAvatar() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        userService.removeAvatar(authentication.getName());
+        return ResponseEntity.ok().build();
+    }
 }
