@@ -7,6 +7,7 @@ const protectedRoutes = [
   /^\/pets\/\d+/, // Matches /pets/123456789
   /^\/pets\/[^/]+\/.+/, // Matches /pets/123456789/anything
   /^\/user$/, // Matches /user exactly
+  /^\/user\/.+/, // Matches /user/123456789/anything
 ];
 
 function isProtectedRoute(pathname: string) {
