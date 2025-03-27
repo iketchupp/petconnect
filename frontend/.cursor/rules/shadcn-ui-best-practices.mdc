@@ -1,0 +1,9 @@
+---
+description: Best practices for using Shadcn UI components
+globs: **/*.tsx,**/*.ts
+---
+- Follow the component structure and naming conventions provided by Shadcn UI
+- Customize components using the provided props and slots
+- Use the theme system to maintain consistent styling across your application
+- Implement accessibility features as recommended by Shadcn UI
+- Keep components up to date with the latest Shadcn UI releases

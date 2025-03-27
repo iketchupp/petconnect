@@ -13,7 +13,7 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenuButton asChild>
-          <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6">
+          <Link href="/" className="flex items-center">
             <div className="rounded-sm bg-white p-1">
               <PawPrint className="size-4 text-black" />
             </div>

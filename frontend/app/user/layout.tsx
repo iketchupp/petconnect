@@ -9,7 +9,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
     <SidebarProvider>
       <UserSidebar />
       <SidebarInset>
-        <div className="flex flex-1 flex-col pb-2">
+        <div className="flex flex-1 flex-col p-1">
           <UserHeader />
           <div className="flex-1">{children}</div>
         </div>

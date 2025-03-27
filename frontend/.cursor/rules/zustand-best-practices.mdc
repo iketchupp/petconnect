@@ -1,0 +1,8 @@
+---
+description: Best practices for state management with Zustand
+globs: **/*.tsx,**/*.ts
+---
+- Create separate stores for different domains of your application.
+- Use middleware like `persist` for local storage or `devtools` for debugging.
+- Implement proper type safety using TypeScript interfaces.
+- Consider using `immer` middleware for immutable state updates.

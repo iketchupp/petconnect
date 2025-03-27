@@ -1,0 +1,9 @@
+---
+description: Best practices for form handling with React Hook Form
+globs: **/*.tsx,**/*.ts
+---
+
+- Use the `useForm` hook with proper validation using Zod or Yup.
+- Implement controlled components for better performance.
+- Utilize the `watch` function for real-time form value monitoring.
+- Handle form submission errors gracefully and provide user feedback.

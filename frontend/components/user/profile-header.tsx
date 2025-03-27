@@ -61,7 +61,6 @@ export function ProfileHeader({ session, isAvatarLoading, onFileSelect }: Profil
           {session.fullName} ({session.username})
         </h3>
         <p className="text-muted-foreground text-xs">{session.email}</p>
-        <p className="text-muted-foreground mt-1 text-xs">Click on the camera icon to update your profile picture</p>
       </div>
     </div>
   );

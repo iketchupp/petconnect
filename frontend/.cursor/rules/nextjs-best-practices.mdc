@@ -1,0 +1,8 @@
+---
+description: Best practices for Next.js applications and routing
+globs: **/*.tsx,**/*.ts,**/*.js,**/*.jsx
+alwaysApply: false
+---
+- Use the App Router for improved performance and simpler data fetching
+- Implement server-side rendering for better SEO and initial load times
+- Utilize Next.js Image component for optimized image loading

@@ -1,0 +1,8 @@
+---
+description: Best practices for schema validation with Zod
+globs: **/*.tsx,**/*.ts
+---
+- Use Zod for runtime type checking and validation.
+- Implement custom error messages for better user feedback.
+- Utilize Zod's inference feature to generate TypeScript types from schemas.
+- Combine Zod with React Hook Form for seamless form validation.
