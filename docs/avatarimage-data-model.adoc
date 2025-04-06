@@ -1,0 +1,142 @@
+= Profilkép (AvatarImage) - Adatmodell
+
+== Leírás
+
+Az AvatarImage (Profilkép) entitás a felhasználók és menhelyek profilképeit reprezentálja a rendszerben. Ez az entitás kapcsolatot teremt a felhasználók/menhelyek és a tárolt képek között, lehetővé téve a profil vizuális azonosítását és személyre szabását.
+
+== Attribútumok
+
+[cols="1h,3", options="header"]
+|===
+| Attribútum | Leírás
+
+| id
+| UUID típusú elsődleges kulcs, amely minden profilképet egyértelműen azonosít a rendszerben. Automatikusan generált, nem módosítható. Adatbázis szinten garantálja az egyediséget.
+
+| imageId
+| UUID típusú külső kulcs, amely azonosítja azt a képet, amely profilképként szolgál. Hivatkozik az Image entitásra.
+
+| createdAt
+| A profilkép létrehozási időpontja LocalDateTime formátumban. Automatikusan generált, nem módosítható időbélyeg.
+
+|===
+
+== Kapcsolatok
+
+[cols="1,1,3"]
+|===
+| Kapcsolódó entitás | Kapcsolat típusa | Leírás
+
+| Image
+| OneToOne
+| Kapcsolat a kép entitással, amely a tényleges képadatokat és metaadatokat tárolja. Az imageId külső kulcs alapján, de nem módosítható a kapcsolaton keresztül (insertable=false, updatable=false).
+
+| User
+| OneToOne
+| Kapcsolat a felhasználóval, akihez a profilkép tartozik. Egyirányú kapcsolat, a User entitás oldala a tulajdonos ("owner").
+
+| Shelter
+| OneToOne
+| Kapcsolat a menhellyel, amelyhez a profilkép tartozik. Egyirányú kapcsolat, a Shelter entitás oldala a tulajdonos ("owner").
+
+|===
+
+== Üzleti szabályok
+
+[cols="1,3"]
+|===
+| Szabály | Leírás
+
+| R1
+| Minden profilképnek kötelezően kapcsolódnia kell egy képhez az Image entitáson keresztül.
+
+| R2
+| Egy profilkép vagy egy felhasználóhoz vagy egy menhelyhez tartozhat, nem lehet egyszerre mindkettőhöz kapcsolva.
+
+| R3
+| A profilkép törlése esetén a kapcsolódó Image rekord is törlésre kerül.
+
+| R4
+| A profilkép módosításakor az időbélyeg (createdAt) nem változtatható meg.
+
+|===
+
+== Példa kód az entitás használatára
+
+[source,java]
+----
+// Új profilkép létrehozása egy felhasználóhoz
+Image newImage = new Image();
+newImage.setUrl("https://example.com/images/profile123.jpg");
+newImage.setContentType("image/jpeg");
+// ... további image beállítások
+imageRepository.save(newImage);
+
+AvatarImage newAvatar = new AvatarImage();
+newAvatar.setImageId(newImage.getId());
+
+// Kapcsolat a felhasználóval
+User user = userRepository.findById(userId).orElseThrow();
+user.setAvatarImage(newAvatar);
+userRepository.save(user);
+----
+
+== API végpontok
+
+[cols="1,1,3"]
+|===
+| Végpont | HTTP metódus | Leírás
+
+| /api/users/{userId}/avatar
+| GET
+| Egy felhasználó profilképének lekérdezése
+
+| /api/users/{userId}/avatar
+| POST
+| Új profilkép feltöltése egy felhasználóhoz
+
+| /api/users/{userId}/avatar
+| PUT
+| Egy felhasználó profilképének cseréje
+
+| /api/users/{userId}/avatar
+| DELETE
+| Egy felhasználó profilképének törlése
+
+| /api/shelters/{shelterId}/avatar
+| GET
+| Egy menhely profilképének lekérdezése
+
+| /api/shelters/{shelterId}/avatar
+| POST
+| Új profilkép feltöltése egy menhelyhez
+
+| /api/shelters/{shelterId}/avatar
+| PUT
+| Egy menhely profilképének cseréje
+
+| /api/shelters/{shelterId}/avatar
+| DELETE
+| Egy menhely profilképének törlése
+
+|===
+
+== Fájlkezelési szempontok
+
+[cols="1,3"]
+|===
+| Szempont | Leírás
+
+| Megengedett formátumok
+| A rendszer a következő képformátumokat fogadja el profilképként: JPEG, PNG, GIF. A képet a rendszer automatikusan átméretezi a megfelelő méretre.
+
+| Maximális méret
+| A feltölthető profilkép maximális mérete 5 MB.
+
+| Tárolás
+| A profilképek fizikai tárolása egy külön tárhelyen (pl. S3 bucket, File System) történik, az Image entitásban csak hivatkozás található rá.
+
+| Automatikus feldolgozás
+| A rendszer a feltöltött képeket automatikusan feldolgozza: optimalizálja, átméretezi a különböző felhasználási helyekhez (miniatűr, normál, nagy).
+
+|===

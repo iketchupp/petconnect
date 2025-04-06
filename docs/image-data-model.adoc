@@ -1,0 +1,81 @@
+= Kép (Image) - Adatmodell
+
+== Leírás
+
+Az Image (Kép) entitás a rendszerben tárolt képeket reprezentálja, amelyeket a felhasználói profilképekhez (AvatarImage) és a kisállat-profilképekhez (PetImage) lehet társítani. Az entitás tartalmazza a képek metaadatait, például URL, fájlnév, méret és típus, valamint a feltöltés időpontját.
+
+== Attribútumok
+
+[cols="1h,3", options="header"] |=== | Attribútum | Leírás
+
+| id | UUID típusú egyedi azonosító. Elsődleges kulcs, automatikusan generált.
+
+| url | A kép elérési URL-je. Maximum 255 karakter hosszú, nem lehet null.
+
+| key | A kép egyedi azonosítója a tárolóban (pl. fájlnév vagy path). Maximum 255 karakter, egyedi és kötelező.
+
+| bucket | A tároló neve (pl. S3 bucket), ahol a kép fizikailag megtalálható. Maximum 100 karakter, kötelező.
+
+| fileType | A fájl típusa (pl. image/jpeg, image/png). Maximum 50 karakter, kötelező.
+
+| fileSize | A fájl mérete bájtban, kötelező mező.
+
+| uploadedAt | A kép feltöltésének időpontja LocalDateTime formátumban. Automatikusan generált, nem módosítható.
+
+|===
+
+== Kapcsolatok
+
+[cols="1,1,3"] |=== | Kapcsolódó entitás | Kapcsolat típusa | Leírás
+
+| AvatarImage | OneToOne | Egy felhasználó profilképét reprezentálja. Egy kép csak egy profilképhez tartozhat. A kapcsolat tulajdonosa az AvatarImage entitás.
+
+| PetImage | OneToOne | Egy kisállat képét reprezentálja. Egy kép csak egy kisállathoz tartozhat. A kapcsolat tulajdonosa a PetImage entitás.
+
+|===
+
+== Üzleti szabályok
+
+[cols="1,3"] |=== | Szabály | Leírás
+
+| R1 | Egy kép csak egyszer használható fel profil- vagy kisállatképként (OneToOne kapcsolat biztosítja).
+
+| R2 | A key mező egyedi, így nem fordulhat elő két azonos fájlnév a tárolóban.
+
+| R3 | A feltöltés dátuma (uploadedAt) automatikusan generálódik, és nem módosítható.
+
+| R4 | Egy kép törlése automatikusan eltávolítja a kapcsolódó AvatarImage vagy PetImage rekordot is (orphanRemoval = true).
+
+|===
+
+== Példa kód az entitás használatára
+
+[source,java]
+// Új kép létrehozása Image image = Image.builder() .url("https://cdn.petconnect.org/images/cute-puppy.jpg") .key("images/cute-puppy.jpg") .bucket("petconnect-bucket") .fileType("image/jpeg") .fileSize(245678L) .build();
+
+imageRepository.save(image);
+== API végpontok (opcionális, ha vannak)
+
+[cols="1,1,3"] |=== | Végpont | HTTP metódus | Leírás
+
+| /api/images/{id} | GET | Kép adatainak lekérdezése azonosító alapján
+
+| /api/images | POST | Új kép feltöltése metaadatokkal
+
+| /api/images/{id} | DELETE | Kép törlése az azonosító alapján
+
+|===
+
+== Statisztikák és elemzések
+
+[cols="1,3"] |=== | Statisztika | Leírás
+
+| Tárolási hely kihasználtság | A fájlméretek alapján számolható, mennyi tárhelyet foglalnak el a képek.
+
+| Képtípus eloszlás | Megmutatja, milyen arányban kerülnek feltöltésre különböző fájltípusok (pl. PNG, JPG).
+
+| Feltöltési trendek | Időbeli eloszlás alapján elemezhető a képek feltöltési gyakorisága.
+
+| Legnézettebb profilképek (ha nyilvántartva van) | A legtöbb megtekintést elért profil- vagy kisállatképek listája.
+
+|===

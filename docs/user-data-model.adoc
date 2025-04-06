@@ -1,0 +1,71 @@
+= Felhasználó (User) – Adatmodell
+
+== Leírás
+
+A User entitás a PetConnect rendszer regisztrált felhasználóit reprezentálja. Minden felhasználónak lehet saját profilképe, lehet menhelyek tulajdonosa vagy tagja, létrehozhat állatokat, üzeneteket küldhet és fogadhat, valamint könyvjelzőzheti az állatokat. A rendszer egyik központi szereplője.
+
+== Attribútumok
+
+[cols="1h,3", options="header"] |=== | Attribútum | Leírás
+
+| id | A felhasználó egyedi UUID azonosítója. Generált, nem módosítható.
+
+| firstName | A felhasználó keresztneve (max. 100 karakter).
+
+| lastName | A felhasználó vezetékneve (max. 100 karakter).
+
+| username | Egyedi felhasználónév (max. 50 karakter).
+
+| email | Egyedi email-cím (max. 100 karakter).
+
+| passwordHash | A jelszó biztonságos hash-elt változata (max. 255 karakter).
+
+| avatarImageId | A profilkép (AvatarImage) UUID azonosítója.
+
+| createdAt | A regisztráció időpontja. Automatikusan generált, nem módosítható. |===
+
+== Kapcsolatok
+
+[cols="1,1,3"] |=== | Kapcsolódó entitás | Kapcsolat típusa | Leírás
+
+| AvatarImage | OneToOne | A felhasználó profilképe. Csak olvasható kapcsolat az avatarImageId alapján.
+
+| Shelter | OneToMany (ownedShelters) | A menhelyek, amelyeket a felhasználó tulajdonol (owner_id).
+
+| ShelterMember | OneToMany (memberships) | A menhelyek, amelyeknek a felhasználó tagja.
+
+| Pet | OneToMany (createdPets) | Az állatok, amelyeket a felhasználó hozott létre.
+
+| Bookmark | OneToMany (bookmarks) | Az állatok, amelyeket a felhasználó elmentett könyvjelzőként.
+
+| Message | OneToMany (sentMessages) | Az üzenetek, amelyeket a felhasználó küldött.
+
+| Message | OneToMany (receivedMessages) | Az üzenetek, amelyeket a felhasználó kapott.
+
+| ShelterMessageAssignment | OneToMany (messageAssignments) | Az üzenetek, amelyeket a felhasználóhoz rendeltek a menhelyen belül. |===
+
+== Üzleti szabályok
+
+[cols="1,3"] |=== | Szabály | Leírás
+
+| R1 | A username és az email mezők egyediek az adatbázisban.
+
+| R2 | Egy felhasználó lehet egyszerre több menhely tulajdonosa vagy tagja is.
+
+| R3 | A createdAt mező automatikusan kitöltésre kerül regisztrációkor.
+
+| R4 | A felhasználó több állatot, könyvjelzőt és üzenetet is kezelhet egyszerre. |===
+
+== Példakód – Felhasználó létrehozása
+
+[source,java]
+User user = User.builder() .firstName("Anna") .lastName("Kovács") .username("annakovacs") .email("anna@example.com") .passwordHash(passwordEncoder.encode("titkosjelszo")) .build();
+
+userRepository.save(user);
+== Megjegyzések
+
+A kapcsolatok nagy részét @OneToMany kapcsolatok reprezentálják, amelyek lehetővé teszik, hogy egy felhasználó rengeteg entitáshoz kapcsolódjon.
+
+A passwordHash mező titkosított jelszót tárol, soha ne legyen plaintext jelszó.
+
+A createdAt mező segítségével lehet szűrni a regisztrációk dátuma szerint, pl. statisztikákhoz.

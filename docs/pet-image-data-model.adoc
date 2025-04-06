@@ -1,0 +1,57 @@
+= Állat kép (PetImage) - Adatmodell
+
+== Leírás
+
+A PetImage entitás összekapcsolja az állatokat (Pet) a hozzájuk tartozó képekkel (Image). Egy állathoz több kép is tartozhat, de ezek közül egy lehet kijelölve elsődlegesnek. A táblázat naplózza a kép hozzárendelésének időpontját, és lehetővé teszi a képek és állatok közötti relációk kezelését.
+
+== Attribútumok
+
+[cols="1h,3", options="header"] |=== | Attribútum | Leírás
+
+| id | UUID típusú, automatikusan generált egyedi azonosító. Elsődleges kulcs.
+
+| petId | Az állat UUID azonosítója, amelyhez a kép tartozik. Kötelező mező. Külső kulcs a Pet entitásra.
+
+| imageId | A kép UUID azonosítója. Kötelező mező. Külső kulcs az Image entitásra.
+
+| isPrimary | Boolean típusú mező, amely jelzi, hogy az adott kép az állat elsődleges (fő) képe-e. Alapértelmezett érték: false.
+
+| createdAt | A hozzárendelés időpontja. Automatikusan generált LocalDateTime típusú érték, nem módosítható.
+
+|===
+
+== Kapcsolatok
+
+[cols="1,1,3"] |=== | Kapcsolódó entitás | Kapcsolat típusa | Leírás
+
+| Pet | ManyToOne (LAZY) | Az állathoz való kapcsolat. A kapcsolat csak olvasható (insertable = false, updatable = false). A @JsonBackReference annotáció megakadályozza a végtelen rekurziót JSON szerializálás során.
+
+| Image | OneToOne (LAZY) | A képhez való kapcsolat. Csak olvasható (insertable = false, updatable = false), és egyedi, mivel egy Image csak egy PetImage rekordhoz tartozhat.
+
+|===
+
+== Üzleti szabályok
+
+[cols="1,3"] |=== | Szabály | Leírás
+
+| R1 | Minden PetImage bejegyzés egy meglévő Pet és Image entitáshoz kapcsolódik (mindkét mező kötelező).
+
+| R2 | Egy állathoz több kép is tartozhat, de ezek közül csak egy lehet megjelölve elsődlegesnek (isPrimary = true).
+
+| R3 | A createdAt mező automatikusan kerül kitöltésre, nem módosítható.
+
+| R4 | A Pet és Image entitásokkal való kapcsolat LAZY betöltésű, így az adatok csak szükség esetén töltődnek be, a teljesítmény optimalizálása érdekében.
+
+|===
+
+== Példa kód az entitás használatára
+
+[source,java]
+// Állatkép hozzárendelése PetImage petImage = PetImage.builder() .petId(petId) .imageId(imageId) .isPrimary(true) // vagy false, ha nem az elsődleges .build();
+
+petImageRepository.save(petImage);
+== További megjegyzések
+
+A @JsonBackReference annotáció használata segít elkerülni a körkörös hivatkozásokat a JSON válaszokban, amikor az Állat entitás visszautal a képeire.
+
+A @ToString és @EqualsAndHashCode annotációkból kizártuk a pet és image mezőket, hogy elkerüljük az esetleges végtelen hivatkozásokat és teljesítménybeli problémákat.
