@@ -6,7 +6,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 20MB
-      max-request-size: 20MB
+      max-request-size: 1GB
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,7 +19,7 @@ spring:
 springdoc:
   api-docs:
     enabled: true
-    path: /v3/api-docs
+    path: /api/v1/docs
 
 logging:
   level:

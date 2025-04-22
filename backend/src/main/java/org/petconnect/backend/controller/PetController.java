@@ -1,13 +1,9 @@
 package org.petconnect.backend.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.UUID;
+
+import org.petconnect.backend.dto.address.AddressDTO;
 import org.petconnect.backend.dto.pet.CreatePetRequest;
 import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
@@ -15,11 +11,24 @@ import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.service.PetService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/pets")
@@ -38,19 +47,33 @@ public class PetController {
             @Parameter(description = "Pagination cursor") @RequestParam(required = false) String cursor,
             @Parameter(description = "Filter by species") @RequestParam(required = false) String species,
             @Parameter(description = "Filter by breed") @RequestParam(required = false) String breed,
-            @Parameter(description = "Filter by age") @RequestParam(required = false) String age,
+            @Parameter(description = "Minimum age in months") @RequestParam(required = false) Integer minAge,
+            @Parameter(description = "Maximum age in months") @RequestParam(required = false) Integer maxAge,
             @Parameter(description = "Filter by gender") @RequestParam(required = false) String gender,
+            @Parameter(description = "Filter by city") @RequestParam(required = false) String city,
+            @Parameter(description = "Filter by country") @RequestParam(required = false) String country,
             @Parameter(description = "Search query") @RequestParam(required = false) String search,
-            @Parameter(description = "Sort field") @RequestParam(required = false) String sortBy,
+            @Parameter(description = "Sort field (newest, oldest, youngest, eldest, name_asc, name_desc, distance)") @RequestParam(required = false) String sortBy,
+            @Parameter(description = "Latitude for distance-based sorting") @RequestParam(required = false) Double lat,
+            @Parameter(description = "Longitude for distance-based sorting") @RequestParam(required = false) Double lng,
             @Parameter(description = "Number of items per page") @RequestParam(required = false, defaultValue = "12") Integer limit) {
         // Build filters from request params
         PetFilters filters = PetFilters.builder()
                 .species(species)
                 .breed(breed)
-                .age(age)
+                .ageRange(minAge != null || maxAge != null ? PetFilters.AgeRange.builder()
+                        .min(minAge)
+                        .max(maxAge)
+                        .build() : null)
                 .gender(gender)
+                .city(city)
+                .country(country)
                 .searchQuery(search)
                 .sortBy(sortBy)
+                .location(lat != null && lng != null ? PetFilters.Location.builder()
+                        .lat(lat)
+                        .lng(lng)
+                        .build() : null)
                 .build();
 
         // Get pets with pagination and filters
@@ -150,5 +173,29 @@ public class PetController {
             @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
         petService.deletePet(petId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get pet's address", description = "Retrieves the address for a specific pet. Returns the full address for shelter pets, but only city and country for personal pets.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved address"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @GetMapping("/{petId}/address")
+    public ResponseEntity<AddressDTO> getPetAddress(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
+        return ResponseEntity.ok(petService.getPetAddress(petId));
+    }
+
+    @Operation(summary = "Get pet's full address", description = "Retrieves the complete address for a specific pet. This endpoint is protected and requires user authentication.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved full address"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/{petId}/full-address")
+    public ResponseEntity<AddressDTO> getFullPetAddress(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
+        return ResponseEntity.ok(petService.getFullPetAddress(petId));
     }
 }

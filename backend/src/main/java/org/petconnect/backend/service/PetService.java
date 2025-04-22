@@ -1,33 +1,39 @@
 package org.petconnect.backend.service;
 
-import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.petconnect.backend.dto.address.AddressDTO;
+import org.petconnect.backend.dto.file.FileResponse;
 import org.petconnect.backend.dto.pet.CreatePetRequest;
 import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
 import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.model.Address;
+import org.petconnect.backend.model.Image;
 import org.petconnect.backend.model.Pet;
+import org.petconnect.backend.model.PetAddress;
+import org.petconnect.backend.model.PetImage;
 import org.petconnect.backend.model.PetStatus;
 import org.petconnect.backend.model.Shelter;
-import org.petconnect.backend.model.PetImage;
-import org.petconnect.backend.model.Image;
+import org.petconnect.backend.repository.AddressRepository;
+import org.petconnect.backend.repository.ImageRepository;
+import org.petconnect.backend.repository.PetAddressRepository;
+import org.petconnect.backend.repository.PetImageRepository;
 import org.petconnect.backend.repository.PetRepository;
 import org.petconnect.backend.repository.ShelterRepository;
-import org.petconnect.backend.repository.PetImageRepository;
-import org.petconnect.backend.repository.ImageRepository;
-import org.petconnect.backend.dto.file.FileResponse;
+import org.petconnect.backend.util.PaginationUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.Base64;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.UUID;
-import java.util.ArrayList;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +45,8 @@ public class PetService {
     private final ImageService imageService;
     private final PetImageRepository petImageRepository;
     private final ImageRepository imageRepository;
+    private final AddressRepository addressRepository;
+    private final PetAddressRepository petAddressRepository;
 
     public PetDTO getPetById(UUID id) {
         Pet pet = petRepository.findById(id)
@@ -46,6 +54,7 @@ public class PetService {
         return PetDTO.fromEntity(pet);
     }
 
+    @SuppressWarnings("UseSpecificCatch")
     public PetsResponse getPets(String cursor, PetFilters filters, int limit) {
         // Calculate offset from cursor if provided
         int offset = 0;
@@ -58,10 +67,22 @@ public class PetService {
             }
         }
 
-        // Convert age string to a date
+        // Process limit - if limit is 0, return all data
+        limit = PaginationUtil.processLimit(limit);
+
+        // Convert age range to dates
         LocalDateTime minDate = null;
-        if (filters.getAge() != null) {
-            minDate = calculateDateFromAge(filters.getAge());
+        LocalDateTime maxDate = null;
+        if (filters.getAgeRange() != null) {
+            LocalDateTime now = LocalDateTime.now();
+            if (filters.getAgeRange().getMin() != null) {
+                // For minimum age, we need the latest possible birth date
+                minDate = now.minusMonths(filters.getAgeRange().getMin());
+            }
+            if (filters.getAgeRange().getMax() != null) {
+                // For maximum age, we need the earliest possible birth date
+                maxDate = now.minusMonths(filters.getAgeRange().getMax());
+            }
         }
 
         // Get total count of pets matching filters
@@ -70,7 +91,13 @@ public class PetService {
                 filters.getBreed(),
                 filters.getGender(),
                 minDate,
-                filters.getSearchQuery());
+                maxDate,
+                filters.getSearchQuery(),
+                filters.getCity(),
+                filters.getCountry());
+
+        // Get the limit to use for the query
+        int queryLimit = PaginationUtil.getQueryLimit(limit);
 
         // Execute query with filters
         List<Pet> pets = petRepository.findPetsByFilters(
@@ -78,50 +105,36 @@ public class PetService {
                 filters.getBreed(),
                 filters.getGender(),
                 minDate,
+                maxDate,
                 filters.getSearchQuery(),
                 filters.getSortBy(),
-                limit + 1, // Request one extra to determine if there are more
+                filters.getLocation() != null ? filters.getLocation().getLat() : null,
+                filters.getLocation() != null ? filters.getLocation().getLng() : null,
+                filters.getCity(),
+                filters.getCountry(),
+                queryLimit,
                 offset);
 
-        // Check if we have more results
-        boolean hasMore = pets.size() > limit;
-
-        // Remove the extra item if we have more
-        if (hasMore) {
-            pets = pets.subList(0, limit);
-        }
+        // Process results
+        PaginationUtil.PaginationResult<Pet> result = PaginationUtil.processResults(pets, limit);
 
         // Convert to DTOs
-        List<PetDTO> petDTOs = pets.stream()
+        List<PetDTO> petDTOs = result.getResults().stream()
                 .map(PetDTO::fromEntity)
                 .collect(Collectors.toList());
 
         // Create next cursor if we have more results
         String nextCursor = null;
-        if (hasMore) {
+        if (result.hasMore()) {
             nextCursor = Base64.getEncoder().encodeToString(String.valueOf(offset + limit).getBytes());
         }
 
         return PetsResponse.builder()
                 .pets(petDTOs)
                 .nextCursor(nextCursor)
-                .hasMore(hasMore)
+                .hasMore(result.hasMore())
                 .totalCount(totalCount)
                 .build();
-    }
-
-    private LocalDateTime calculateDateFromAge(String age) {
-        // Parse age string like "puppy", "young", "adult", "senior"
-        // and convert to appropriate date ranges
-        LocalDateTime now = LocalDateTime.now();
-
-        return switch (age.toLowerCase()) {
-            case "puppy", "baby" -> now.minus(Period.ofMonths(6));
-            case "young" -> now.minus(Period.ofYears(2));
-            case "adult" -> now.minus(Period.ofYears(8));
-            case "senior" -> now.minus(Period.ofYears(100)); // Very old date to include all senior pets
-            default -> null;
-        };
     }
 
     public List<String> getAllSpecies() {
@@ -139,7 +152,6 @@ public class PetService {
     @Transactional
     public PetDTO createPet(CreatePetRequest request) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        System.out.println(userEmail);
         UserDTO currentUser = userService.getUser(userEmail);
 
         // If shelterId is provided, verify user is a member or owner of the shelter
@@ -147,12 +159,20 @@ public class PetService {
             Shelter shelter = shelterRepository.findById(request.getShelterId())
                     .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
 
-            boolean isOwnerOrMember = shelter.getOwnerId().equals(currentUser.getId()) ||
-                    shelter.getMembers().stream()
-                            .anyMatch(member -> member.getUserId().equals(currentUser.getId()));
+            boolean isOwner = shelter.getOwnerId().equals(currentUser.getId());
 
-            if (!isOwnerOrMember) {
+            if (!isOwner) {
                 throw new IllegalArgumentException("User is not authorized to create pets for this shelter");
+            }
+
+            // Shelter pets should not have an address
+            if (request.getAddress() != null) {
+                throw new IllegalArgumentException("Shelter pets should not have an address");
+            }
+        } else {
+            // User pets must have an address
+            if (request.getAddress() == null) {
+                throw new IllegalArgumentException("Address is required for user pets");
             }
         }
 
@@ -169,6 +189,40 @@ public class PetService {
                 .build();
 
         pet = petRepository.save(pet);
+
+        // Create address for user pets
+        if (request.getAddress() != null) {
+            // Create the address
+            Address address = Address.builder()
+                    .address1(request.getAddress().getAddress1())
+                    .address2(request.getAddress().getAddress2())
+                    .city(request.getAddress().getCity())
+                    .region(request.getAddress().getRegion())
+                    .postalCode(request.getAddress().getPostalCode())
+                    .country(request.getAddress().getCountry())
+                    .lat(request.getAddress().getLat())
+                    .lng(request.getAddress().getLng())
+                    .build();
+
+            // Create formatted address
+            address.setFormattedAddress(String.format("%s, %s, %s %s",
+                    address.getAddress1(),
+                    address.getCity(),
+                    address.getRegion(),
+                    address.getPostalCode()));
+
+            address = addressRepository.save(address);
+
+            // Create the pet address relationship
+            PetAddress petAddress = PetAddress.builder()
+                    .petId(pet.getId())
+                    .addressId(address.getId())
+                    .build();
+
+            petAddress = petAddressRepository.save(petAddress);
+            pet.setPetAddress(petAddress);
+        }
+
         return PetDTO.fromEntity(pet);
     }
 
@@ -183,8 +237,7 @@ public class PetService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
-                (pet.getShelterId() != null && pet.getShelter().getMembers().stream()
-                        .anyMatch(member -> member.getUserId().equals(currentUser.getId())));
+                (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
 
         if (!isAuthorized) {
             throw new IllegalArgumentException("User is not authorized to modify this pet");
@@ -247,19 +300,74 @@ public class PetService {
 
         // Verify user has permission to delete the pet
         boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
-                (pet.getShelterId() != null && pet.getShelter().getMembers().stream()
-                        .anyMatch(member -> member.getUserId().equals(currentUser.getId())));
+                (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
 
         if (!isAuthorized) {
             throw new IllegalArgumentException("User is not authorized to delete this pet");
         }
 
-        // Delete all associated pet images and their storage files
-        pet.getPetImages().forEach(petImage -> {
-            imageService.deleteImage(petImage.getImage().getKey());
-        });
+        // Store image keys for deletion after PetImage records are removed
+        List<String> imageKeys = pet.getPetImages().stream()
+                .map(petImage -> petImage.getImage().getKey())
+                .collect(Collectors.toList());
+
+        // First clear the pet's image collection to remove the PetImage records
+        pet.getPetImages().clear();
+        petRepository.save(pet);
+
+        // Now that the foreign key constraints are removed, delete the actual images
+        imageKeys.forEach(key -> imageService.deleteImage(key));
 
         // Delete the pet record
         petRepository.delete(pet);
+    }
+
+    public AddressDTO getPetAddress(UUID petId) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // If pet is registered with a shelter, return shelter's address
+        if (pet.getShelterId() != null) {
+            Shelter shelter = shelterRepository.findById(pet.getShelterId())
+                    .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+            return shelter.getAddress() != null ? AddressDTO.fromEntity(shelter.getAddress()) : null;
+        }
+
+        // Otherwise, return pet's address with restricted information (only city and
+        // country)
+        PetAddress petAddress = petAddressRepository.findByPetId(petId)
+                .orElse(null);
+        if (petAddress != null && petAddress.getAddress() != null) {
+            Address address = petAddress.getAddress();
+            // Create a new AddressDTO with only city and country fields populated
+            return AddressDTO.builder()
+                    .city(address.getCity())
+                    .country(address.getCountry())
+                    .formattedAddress(address.getCity() + ", " + address.getCountry())
+                    .lat(address.getLat())
+                    .lng(address.getLng())
+                    .build();
+        }
+        return null;
+    }
+
+    public AddressDTO getFullPetAddress(UUID petId) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // If pet is registered with a shelter, return shelter's address
+        if (pet.getShelterId() != null) {
+            Shelter shelter = shelterRepository.findById(pet.getShelterId())
+                    .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+            return shelter.getAddress() != null ? AddressDTO.fromEntity(shelter.getAddress()) : null;
+        }
+
+        // Return the complete pet address
+        PetAddress petAddress = petAddressRepository.findByPetId(petId)
+                .orElse(null);
+        if (petAddress != null && petAddress.getAddress() != null) {
+            return AddressDTO.fromEntity(petAddress.getAddress());
+        }
+        return null;
     }
 }

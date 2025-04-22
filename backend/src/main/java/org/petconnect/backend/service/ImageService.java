@@ -40,12 +40,11 @@ public class ImageService {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
         }
-        
+
         if (!FileTypeValidator.isValidFileType(file)) {
             throw new IllegalArgumentException(
-                "Invalid file type. Allowed types are: " + 
-                String.join(", ", FileTypeValidator.getAllowedContentTypes())
-            );
+                    "Invalid file type. Allowed types are: " +
+                            String.join(", ", FileTypeValidator.getAllowedContentTypes()));
         }
     }
 
@@ -58,12 +57,11 @@ public class ImageService {
                 .build();
 
         var image = Image.builder()
-            .url(String.format("%s/%s/%s", yamlConfig.getStorage().getS3().getEndpoint(), getBucketName(), objectName))
-            .key(objectName) 
-            .bucket(getBucketName())
-            .fileSize(response.getSize())
-            .fileType(file.getContentType())
-            .build();
+                .key(objectName)
+                .bucket(getBucketName())
+                .fileSize(response.getSize())
+                .fileType(file.getContentType())
+                .build();
 
         imageRepository.save(image);
 
@@ -77,7 +75,7 @@ public class ImageService {
         try {
             // Delete from S3/MinIO first
             storageService.deleteFile(key);
-            
+
             // Then delete from database if exists
             imageRepository.findByKey(key).ifPresent(image -> {
                 imageRepository.delete(image);

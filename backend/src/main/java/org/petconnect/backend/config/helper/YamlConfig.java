@@ -1,5 +1,7 @@
 package org.petconnect.backend.config.helper;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ public class YamlConfig {
     private Server server;
     private Frontend frontend;
     private Jwt jwt;
+    private Cors cors;
 
     @Data
     public static class Database {
@@ -68,5 +71,11 @@ public class YamlConfig {
         private String secret;
         private long expirationMs = 7 * 24 * 60 * 60 * 1000; // 24 hours by default
         private String cookieName;
+    }
+
+    @Data
+    public static class Cors {
+        private List<String> allowedOrigins;
+        private List<String> allowedMethods;
     }
 }

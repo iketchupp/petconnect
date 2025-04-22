@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import org.petconnect.backend.dto.address.AddressDTO;
 import org.petconnect.backend.model.Shelter;
 
 import java.time.LocalDateTime;

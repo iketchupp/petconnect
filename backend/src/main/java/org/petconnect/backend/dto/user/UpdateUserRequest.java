@@ -29,4 +29,8 @@ public class UpdateUserRequest {
     @Email(message = "Invalid email format")
     @Schema(description = "User's email address", example = "john.smith@example.com")
     private String email;
+
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    @Schema(description = "User's password (optional)", example = "password123", nullable = true)
+    private String password;
 }

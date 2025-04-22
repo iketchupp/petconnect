@@ -1,16 +1,26 @@
 package org.petconnect.backend.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.petconnect.backend.dto.file.FileResponse;
-import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.dto.pet.PetDTO;
+import org.petconnect.backend.dto.pet.PetsResponse;
+import org.petconnect.backend.dto.shelter.ShelterDTO;
+import org.petconnect.backend.dto.shelter.SheltersResponse;
 import org.petconnect.backend.dto.user.UpdateUserRequest;
+import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.model.AvatarImage;
 import org.petconnect.backend.model.Image;
+import org.petconnect.backend.model.Pet;
+import org.petconnect.backend.model.Shelter;
 import org.petconnect.backend.model.User;
 import org.petconnect.backend.repository.AvatarImageRepository;
 import org.petconnect.backend.repository.ImageRepository;
+import org.petconnect.backend.repository.PetRepository;
+import org.petconnect.backend.repository.ShelterRepository;
 import org.petconnect.backend.repository.UserRepository;
+import org.petconnect.backend.util.PaginationUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,9 +35,17 @@ public class UserService {
     private final ImageService imageService;
     private final ImageRepository imageRepository;
     private final AvatarImageRepository avatarImageRepository;
+    private final PetRepository petRepository;
+    private final ShelterRepository shelterRepository;
 
     public UserDTO getUser(String v) {
         User user = userRepository.findByEmail(v)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return UserDTO.fromEntity(user);
+    }
+
+    public UserDTO getUserById(UUID id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return UserDTO.fromEntity(user);
     }
@@ -65,7 +83,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateAvatar(String email, MultipartFile file) {
+    public UserDTO updateAvatar(String email, MultipartFile file) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalStateException("User not found"));
 
@@ -106,7 +124,7 @@ public class UserService {
             }
         }
 
-        return user;
+        return UserDTO.fromEntity(user);
     }
 
     @Transactional
@@ -131,5 +149,92 @@ public class UserService {
         // Delete the avatar image from storage and database
         imageService.deleteImage(avatar.getImage().getKey());
         avatarImageRepository.delete(avatar);
+    }
+
+    public PetsResponse getUserPets(String email, String cursor, Integer limit) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Parse cursor if provided
+        int offset = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            offset = Integer.parseInt(cursor);
+        }
+
+        // Process limit - if limit is 0, return all data
+        int processedLimit = PaginationUtil.processLimit(limit);
+
+        // Get the limit to use for the query
+        int queryLimit = PaginationUtil.getQueryLimit(processedLimit);
+
+        // Get paginated pets
+        List<Pet> pets = petRepository.findByOwnerIdWithPagination(user.getId(), queryLimit, offset);
+
+        // Get total count for pagination
+        long totalCount = petRepository.countByOwnerId(user.getId());
+
+        // Process results
+        PaginationUtil.PaginationResult<Pet> result = PaginationUtil.processResults(pets, processedLimit);
+
+        // Convert to DTOs
+        List<PetDTO> petDTOs = result.getResults().stream()
+                .map(PetDTO::fromEntity)
+                .toList();
+
+        // Calculate next cursor
+        String nextCursor = null;
+        if (result.hasMore()) {
+            nextCursor = String.valueOf(offset + processedLimit);
+        }
+
+        return PetsResponse.builder()
+                .pets(petDTOs)
+                .nextCursor(nextCursor)
+                .hasMore(result.hasMore())
+                .totalCount(totalCount)
+                .build();
+    }
+
+    public SheltersResponse getUserShelters(String email, String cursor, Integer limit) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Parse cursor if provided
+        int offset = 0;
+        if (cursor != null && !cursor.isEmpty()) {
+            offset = Integer.parseInt(cursor);
+        }
+
+        // Process limit - if limit is 0, return all data
+        int processedLimit = PaginationUtil.processLimit(limit);
+
+        // Get the limit to use for the query
+        int queryLimit = PaginationUtil.getQueryLimit(processedLimit);
+
+        // Get paginated shelters owned by user
+        List<Shelter> shelters = shelterRepository.findByOwnerIdOrderByCreatedAtDesc(user.getId(), queryLimit, offset);
+
+        long totalCount = shelterRepository.countByOwnerId(user.getId());
+
+        // Process results
+        PaginationUtil.PaginationResult<Shelter> result = PaginationUtil.processResults(shelters, processedLimit);
+
+        // Convert to DTOs
+        List<ShelterDTO> shelterDTOs = result.getResults().stream()
+                .map(ShelterDTO::fromEntity)
+                .toList();
+
+        // Calculate next cursor
+        String nextCursor = null;
+        if (result.hasMore()) {
+            nextCursor = String.valueOf(offset + processedLimit);
+        }
+
+        return SheltersResponse.builder()
+                .shelters(shelterDTOs)
+                .nextCursor(nextCursor)
+                .hasMore(result.hasMore())
+                .totalCount(totalCount)
+                .build();
     }
 }

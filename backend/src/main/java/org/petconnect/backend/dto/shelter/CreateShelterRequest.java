@@ -1,5 +1,7 @@
 package org.petconnect.backend.dto.shelter;
 
+import org.petconnect.backend.dto.address.CreateAddressRequest;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
