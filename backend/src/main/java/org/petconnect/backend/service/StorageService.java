@@ -26,6 +26,7 @@ public class StorageService {
         return yamlConfig.getStorage().getS3().getBucket();
     }
 
+    @SuppressWarnings("UseSpecificCatch")
     public void initBucket() {
         try {
             boolean bucketExists = minioClient.bucketExists(
@@ -50,7 +51,7 @@ public class StorageService {
             String originalFilename = file.getOriginalFilename();
             String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             String objectName = UUID.randomUUID() + extension;
-            
+
             return uploadFileWithObjectName(file, objectName);
         } catch (Exception e) {
             log.error("Error uploading file: {}", e.getMessage());
@@ -58,6 +59,7 @@ public class StorageService {
         }
     }
 
+    @SuppressWarnings("UseSpecificCatch")
     public String uploadFileWithObjectName(MultipartFile file, String objectName) {
         try {
             // Upload the file
@@ -67,9 +69,8 @@ public class StorageService {
                             .object(objectName)
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
-                            .build()
-            );
-            
+                            .build());
+
             log.info("File '{}' uploaded successfully with object name '{}'", file.getOriginalFilename(), objectName);
             return objectName;
         } catch (Exception e) {
@@ -81,14 +82,14 @@ public class StorageService {
     /**
      * Delete a file from MinIO
      */
+    @SuppressWarnings("UseSpecificCatch")
     public void deleteFile(String objectName) {
         try {
             minioClient.removeObject(
-                RemoveObjectArgs.builder()
-                    .bucket(getBucketName())
-                    .object(objectName)
-                    .build()
-            );
+                    RemoveObjectArgs.builder()
+                            .bucket(getBucketName())
+                            .object(objectName)
+                            .build());
             log.info("File '{}' deleted successfully", objectName);
         } catch (Exception e) {
             log.error("Error deleting file: {}", e.getMessage());
