@@ -1,7 +1,8 @@
-import { getSession, logout } from '@/actions/auth';
 import { create } from 'zustand';
 
-import { User } from '@/types/api';
+import { getSession, login, logout, register } from '@/actions/auth';
+import { AuthResponse, ErrorResponse, User } from '@/types/api';
+import { UserLogin, UserRegister } from '@/types/auth';
 
 interface AuthStore {
   session: User | null;
@@ -13,6 +14,9 @@ interface AuthStore {
   isAuthenticated: () => boolean;
   reset: () => Promise<void>;
   refresh: () => Promise<void>;
+  register: (data: UserRegister) => Promise<AuthResponse | ErrorResponse>;
+  login: (data: UserLogin) => Promise<AuthResponse | ErrorResponse>;
+  reAuth: (data: UserLogin) => Promise<AuthResponse | ErrorResponse>;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -48,6 +52,31 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         error: error instanceof Error ? error.message : 'Failed to refresh session',
         isLoading: false,
       });
+    }
+  },
+  register: async (data: UserRegister) => {
+    try {
+      const response = await register(data);
+      return response;
+    } catch (error) {
+      return error as ErrorResponse;
+    }
+  },
+  login: async (data: UserLogin) => {
+    try {
+      const response = await login(data);
+      return response;
+    } catch (error) {
+      return error as ErrorResponse;
+    }
+  },
+  reAuth: async (data: UserLogin) => {
+    try {
+      const response = await login(data);
+      get().refresh();
+      return response;
+    } catch (error) {
+      return error as ErrorResponse;
     }
   },
 }));

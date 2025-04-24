@@ -1,4 +1,4 @@
-import { Bookmark, Home, LucideIcon, MessageSquare, PawPrint, User } from 'lucide-react';
+import { Heart, Home, LucideIcon, MessageSquare, PawPrint, User } from 'lucide-react';
 
 type NavTemplateConfig = {
   main: {
@@ -29,6 +29,10 @@ export const navConfig = {
       title: 'Pets',
       href: '/pets',
     },
+    {
+      title: 'Shelters',
+      href: '/shelters',
+    },
   ],
   sidebar: {
     // /user
@@ -51,9 +55,9 @@ export const navConfig = {
         icon: Home,
       },
       {
-        title: 'Bookmarks',
-        href: '/bookmarks',
-        icon: Bookmark,
+        title: 'Favorites',
+        href: '/favorites',
+        icon: Heart,
       },
       {
         title: 'Messages',

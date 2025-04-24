@@ -15,13 +15,15 @@ interface ImageCropperProps {
   selectedFile: File | null;
 }
 
-// This function creates a centered crop with a specific aspect ratio
 function centerAspectCrop(mediaWidth: number, mediaHeight: number, aspect: number) {
+  const cropSize = Math.min(mediaWidth, mediaHeight);
+
   return centerCrop(
     makeAspectCrop(
       {
-        unit: '%',
-        width: 90,
+        unit: 'px',
+        width: cropSize,
+        height: cropSize,
       },
       aspect,
       mediaWidth,
@@ -39,9 +41,8 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
   const imgRef = useRef<HTMLImageElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
-  const [displaySize, setDisplaySize] = useState({ width: 400, height: 400 }); // Default size
+  const [displaySize, setDisplaySize] = useState({ width: 400, height: 400 });
 
-  // Load the image when the file changes
   useEffect(() => {
     if (!selectedFile) {
       setImgSrc('');
@@ -55,47 +56,27 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
     reader.readAsDataURL(selectedFile);
   }, [selectedFile]);
 
-  // Set the initial crop when the image loads
   const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     if (!width || !height) return;
 
     setImageSize({ width, height });
 
-    // Calculate display size to ensure minimum dimensions
-    const MIN_DISPLAY_SIZE = 400; // Minimum display size in pixels
-    const containerWidth = Math.min(window.innerWidth - 64, 600); // Max width of dialog minus padding
-    const containerHeight = window.innerHeight - 200; // Available height minus header/footer
+    const containerWidth = Math.min(window.innerWidth - 64, 600);
+    const containerHeight = window.innerHeight - 200;
 
-    let displayWidth = width;
-    let displayHeight = height;
+    const scale = Math.min(containerWidth / width, containerHeight / height);
 
-    // Scale up if image is too small
-    if (width < MIN_DISPLAY_SIZE || height < MIN_DISPLAY_SIZE) {
-      const scale = Math.max(MIN_DISPLAY_SIZE / width, MIN_DISPLAY_SIZE / height);
-      displayWidth = width * scale;
-      displayHeight = height * scale;
-    }
+    const displayWidth = width * scale;
+    const displayHeight = height * scale;
 
-    // Scale down if image is too large
-    if (displayWidth > containerWidth || displayHeight > containerHeight) {
-      const scale = Math.min(containerWidth / displayWidth, containerHeight / displayHeight);
-      displayWidth *= scale;
-      displayHeight *= scale;
-    }
+    setDisplaySize({ width: displayWidth, height: displayHeight });
 
-    // Only update display size if we have valid dimensions
-    if (displayWidth > 0 && displayHeight > 0) {
-      setDisplaySize({ width: displayWidth, height: displayHeight });
-    }
-
-    // Set a 1:1 aspect ratio crop centered in the image
     const initialCrop = centerAspectCrop(width, height, 1);
     setCrop(initialCrop);
     setCompletedCrop(initialCrop);
   }, []);
 
-  // Convert the cropped area to a File object
   const handleCropComplete = async () => {
     if (!imgRef.current || !completedCrop) return;
 
@@ -109,7 +90,6 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
         throw new Error('No 2d context');
       }
 
-      // Calculate the crop area
       const scaleX = image.naturalWidth / image.width;
       const scaleY = image.naturalHeight / image.height;
 
@@ -119,18 +99,14 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
       const cropWidth = completedCrop.width * scaleX;
       const cropHeight = completedCrop.height * scaleY;
 
-      // Set the canvas size to the crop size
       canvas.width = cropWidth * pixelRatio;
       canvas.height = cropHeight * pixelRatio;
 
-      // Increase the size of the canvas for higher quality
       ctx.scale(pixelRatio, pixelRatio);
       ctx.imageSmoothingQuality = 'high';
 
-      // Draw the cropped image
       ctx.drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
 
-      // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve) => {
         canvas.toBlob(
           (b) => {
@@ -142,7 +118,6 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
         );
       });
 
-      // Create a file from the blob
       const croppedFile = new File([blob], selectedFile?.name || 'cropped-image.jpg', {
         type: selectedFile?.type || 'image/jpeg',
       });
@@ -174,15 +149,18 @@ export function ImageCropper({ open, onClose, onCropComplete, selectedFile }: Im
                   circularCrop={false}
                   keepSelection
                   className="max-h-[60vh]"
+                  minWidth={50}
+                  minHeight={50}
                 >
                   <img
                     ref={imgRef}
                     src={imgSrc}
                     alt="Crop me"
                     style={{
-                      width: displaySize.width || 400,
-                      height: displaySize.height || 400,
                       maxWidth: '100%',
+                      maxHeight: '60vh',
+                      width: 'auto',
+                      height: 'auto',
                       objectFit: 'contain',
                     }}
                     onLoad={onImageLoad}

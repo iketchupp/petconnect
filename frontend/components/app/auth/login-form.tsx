@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { login } from '@/actions/auth';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
@@ -27,6 +26,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { login } = useAuthStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -144,7 +144,7 @@ export function LoginForm({ className, ...props }: LoginFormProps) {
 
           <div>
             <p className="text-center text-sm">
-              Don't have an account?
+              Don&apos;t have an account?
               <Button asChild variant="link" className="px-2">
                 <Link href="/auth/register" className="underline underline-offset-4">
                   Register

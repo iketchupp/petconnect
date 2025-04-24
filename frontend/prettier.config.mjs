@@ -12,6 +12,7 @@ const config = {
     '<THIRD_PARTY_MODULES>',
     '',
     '^types$',
+    '^@/actions/(.*)$',
     '^@/types/(.*)$',
     '^@/config/(.*)$',
     '^@/lib/(.*)$',

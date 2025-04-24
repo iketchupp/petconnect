@@ -1,3 +1,5 @@
+import { Address } from './address';
+
 export interface Pet {
   id: string;
   name: string;
@@ -11,6 +13,7 @@ export interface Pet {
   shelterName?: string;
   createdAt: string;
   imageUrls: string[];
+  address: Address;
 }
 
 export interface PetsResponse {
@@ -24,4 +27,24 @@ export enum PetStatus {
   AVAILABLE = 'AVAILABLE',
   ADOPTED = 'ADOPTED',
   PENDING = 'PENDING',
+}
+
+export interface CreatePetData {
+  name: string;
+  description: string;
+  species: string;
+  breed: string;
+  gender: string;
+  birthDate: string;
+  shelterId?: string;
+  address?: {
+    address1: string | number;
+    address2?: string;
+    city: string;
+    region: string;
+    postalCode: string | number;
+    country: string;
+    lat?: number;
+    lng?: number;
+  };
 }

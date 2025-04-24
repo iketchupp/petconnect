@@ -6,6 +6,7 @@ export interface User {
   username: string;
   email: string;
   avatarUrl?: string; // UUID, optional
+  token?: string; // JWT token for authentication
 }
 
 // Auth related types

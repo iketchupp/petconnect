@@ -1,16 +1,17 @@
-import { isServer, QueryClient } from '@tanstack/react-query';
+import { isServer, QueryCache, QueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
-function makeQueryClient() {
-  return new QueryClient();
-}
-
-let browserQueryClient: QueryClient | undefined = undefined;
-
-export function getQueryClient() {
-  if (isServer) {
-    return makeQueryClient();
-  }
-
-  if (!browserQueryClient) browserQueryClient = makeQueryClient();
-  return browserQueryClient;
-}
+export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error) => {
+      toast.error(error.message, {
+        action: {
+          label: 'Retry',
+          onClick: () => {
+            queryClient.invalidateQueries();
+          },
+        },
+      });
+    },
+  }),
+});

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { register } from '@/actions/auth';
 import { useAuthStore } from '@/stores/auth-store';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
@@ -57,6 +56,7 @@ export function RegisterForm({ className, ...props }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { register } = useAuthStore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

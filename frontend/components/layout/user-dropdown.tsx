@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
-import { Bookmark, Home, LayoutDashboard, LogOut, MessageSquare, PawPrint, User } from 'lucide-react';
+import { Heart, Home, LayoutDashboard, LogOut, MessageSquare, PawPrint, User } from 'lucide-react';
 
 import { getAbbreviation } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -76,9 +76,9 @@ export function UserDropdown({ children, side = 'right', sideOffset = 4, align =
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link href="/user/bookmarks">
-              <Bookmark className="mr-2 size-4" />
-              <span>Bookmarks</span>
+            <Link href="/user/favorites">
+              <Heart className="mr-2 size-4" />
+              <span>Favorites</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>

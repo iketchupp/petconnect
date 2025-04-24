@@ -5,9 +5,9 @@ import { useAuthStore } from '@/stores/auth-store';
 import { toast } from 'sonner';
 
 import { http } from '@/lib/http';
-import { ImageCropper } from '@/components/user/image-cropper';
-import { ProfileForm } from '@/components/user/profile-form';
-import { ProfileHeader } from '@/components/user/profile-header';
+import { ImageCropper } from '@/components/app/user/image-cropper';
+import { ProfileForm } from '@/components/app/user/profile-form';
+import { ProfileHeader } from '@/components/app/user/profile-header';
 
 export function UserProfile() {
   const { session, refresh } = useAuthStore();
@@ -39,7 +39,7 @@ export function UserProfile() {
       refresh();
       toast.success('Avatar updated successfully');
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error('Failed to update avatar');
     } finally {
       setIsAvatarLoading(false);

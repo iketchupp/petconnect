@@ -90,7 +90,11 @@ export async function getSession() {
 
     const response = await http.get<User>('/user/me');
 
-    return response.data;
+    // Add the token to the user object
+    return {
+      ...response.data,
+      token: token.value,
+    };
   } catch (error) {
     return null;
   }

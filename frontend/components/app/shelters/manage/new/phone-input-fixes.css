@@ -1,0 +1,63 @@
+/* Fix alignment issues with flag icons in PhoneInput */
+
+.phone-input-container .phone-input-fixed {
+  /* Ensure proper spacing */
+  gap: 0 !important;
+}
+
+/* Fix flag container alignment */
+.phone-input-container [class*='PhoneInputCountry'] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure flag is centered in its container */
+.phone-input-container span.bg-foreground\/20 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto !important;
+}
+
+/* Fix alignment of flag in the dropdown menu */
+.phone-input-container .bg-foreground\/20,
+.popover-content .bg-foreground\/20 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+}
+
+/* Fix flag SVG to fill its container properly */
+.phone-input-container .bg-foreground\/20 svg,
+.popover-content .bg-foreground\/20 svg {
+  height: 100%;
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Fix the button layout */
+.phone-input-container button[data-slot='trigger'] {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+  height: 100%;
+}
+
+/* Ensure the flags in dropdown menu are aligned properly */
+.CommandItem .bg-foreground\/20 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fix layout in dropdown items */
+.CommandItem {
+  display: flex;
+  align-items: center;
+}

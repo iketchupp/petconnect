@@ -1,4 +1,6 @@
 import { AuthProvider } from '@/contexts/auth-context';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -11,8 +13,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <QueryProvider>
         <TooltipProvider>
           <AuthProvider>
-            {children}
-            <Toaster />
+            <NuqsAdapter>
+              {children}
+              <ReactQueryDevtools />
+              <Toaster richColors />
+            </NuqsAdapter>
           </AuthProvider>
         </TooltipProvider>
       </QueryProvider>

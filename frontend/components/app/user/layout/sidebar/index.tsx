@@ -4,7 +4,7 @@ import { PawPrint } from 'lucide-react';
 import { navConfig } from '@/config/nav.config';
 import { siteConfig } from '@/config/site.config';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenuButton } from '@/components/ui/sidebar';
-import { NavUser } from '@/components/user/layout/sidebar/nav-user';
+import { NavUser } from '@/components/app/user/layout/sidebar/nav-user';
 
 import { NavGroup } from './nav-group';
 
