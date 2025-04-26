@@ -61,6 +61,9 @@ public class PetDTO {
     @Schema(description = "Address information (only present for user pets)")
     private AddressDTO address;
 
+    @Schema(description = "ID of the pet owner", example = "123e4567-e89b-12d3-a456-426614174000")
+    private UUID ownerId;
+
     public static PetDTO fromEntity(Pet pet) {
         return PetDTO.builder()
                 .id(pet.getId())
@@ -78,6 +81,7 @@ public class PetDTO {
                         .map(image -> image.getImage().getUrl())
                         .collect(Collectors.toList()))
                 .address(pet.getAddress() != null ? AddressDTO.fromEntity(pet.getAddress()) : null)
+                .ownerId(pet.getCreatedByUserId())
                 .build();
     }
 }

@@ -2,9 +2,6 @@ package org.petconnect.backend.util;
 
 import java.util.List;
 
-/**
- * Utility class for pagination-related operations
- */
 public class PaginationUtil {
 
     private PaginationUtil() {

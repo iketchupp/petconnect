@@ -9,12 +9,16 @@ import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
 import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.model.PetStatus;
 import org.petconnect.backend.service.PetService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -197,5 +201,38 @@ public class PetController {
     public ResponseEntity<AddressDTO> getFullPetAddress(
             @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
         return ResponseEntity.ok(petService.getFullPetAddress(petId));
+    }
+
+    @Operation(summary = "Update pet status", description = "Updates the status of a pet. Only the pet owner or shelter members can update the status.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated pet status"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not authorized to update this pet's status"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{petId}/status/{status}")
+    public ResponseEntity<PetDTO> updatePetStatus(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId,
+            @Parameter(description = "New status for the pet", required = true) @PathVariable PetStatus status) {
+        return ResponseEntity.ok(petService.updatePetStatus(petId, status));
+    }
+
+    @Operation(summary = "Mark pet as adopted", description = "Mark a pet as adopted by a user who has messaged about the pet")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pet marked as adopted successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not authorized to mark pet as adopted"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{petId}/adopt")
+    public ResponseEntity<PetDTO> markPetAsAdopted(
+            @Parameter(description = "ID of the pet", required = true) @PathVariable UUID petId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        UserDTO currentUser = petService.getUserByEmail(userEmail);
+
+        return ResponseEntity.ok(petService.markPetAsAdopted(petId, currentUser.getId()));
     }
 }

@@ -42,9 +42,6 @@ public class StorageService {
         }
     }
 
-    /**
-     * Upload a file to MinIO
-     */
     public String uploadFile(MultipartFile file) {
         try {
             // Generate a unique file name
@@ -79,9 +76,6 @@ public class StorageService {
         }
     }
 
-    /**
-     * Delete a file from MinIO
-     */
     @SuppressWarnings("UseSpecificCatch")
     public void deleteFile(String objectName) {
         try {

@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.petconnect.backend.dto.address.AddressDTO;
 import org.petconnect.backend.dto.file.FileResponse;
+import org.petconnect.backend.dto.message.WebSocketMessage;
 import org.petconnect.backend.dto.pet.CreatePetRequest;
 import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
@@ -23,11 +25,13 @@ import org.petconnect.backend.model.PetStatus;
 import org.petconnect.backend.model.Shelter;
 import org.petconnect.backend.repository.AddressRepository;
 import org.petconnect.backend.repository.ImageRepository;
+import org.petconnect.backend.repository.MessageRepository;
 import org.petconnect.backend.repository.PetAddressRepository;
 import org.petconnect.backend.repository.PetImageRepository;
 import org.petconnect.backend.repository.PetRepository;
 import org.petconnect.backend.repository.ShelterRepository;
 import org.petconnect.backend.util.PaginationUtil;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +51,8 @@ public class PetService {
     private final ImageRepository imageRepository;
     private final AddressRepository addressRepository;
     private final PetAddressRepository petAddressRepository;
+    private final MessageRepository messageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public PetDTO getPetById(UUID id) {
         Pet pet = petRepository.findById(id)
@@ -369,5 +375,105 @@ public class PetService {
             return AddressDTO.fromEntity(petAddress.getAddress());
         }
         return null;
+    }
+
+    @Transactional
+    public PetDTO updatePetStatus(UUID petId, PetStatus newStatus) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDTO currentUser = userService.getUser(userEmail);
+
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // Verify user has permission to update the status
+        boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
+                (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
+
+        if (!isAuthorized) {
+            throw new IllegalArgumentException("User is not authorized to update this pet's status");
+        }
+
+        // Cannot change status if already adopted
+        if (pet.getStatus() == PetStatus.ADOPTED) {
+            throw new IllegalArgumentException("Cannot change status of an adopted pet");
+        }
+
+        pet.setStatus(newStatus);
+        pet = petRepository.save(pet);
+
+        // Send WebSocket notification about status change
+        notifyPetStatusUpdate(pet);
+
+        return PetDTO.fromEntity(pet);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        return userService.getUser(email);
+    }
+
+    @Transactional
+    public PetDTO markPetAsAdopted(UUID petId, UUID userId) {
+        Pet pet = petRepository.findById(petId)
+                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+
+        // Check if the pet has PENDING status
+        if (pet.getStatus() != PetStatus.PENDING) {
+            throw new IllegalArgumentException("Only pets with PENDING status can be marked as adopted");
+        }
+
+        // Check if the user is the owner or has messaged about the pet
+        boolean isOwner = pet.getCreatedByUserId().equals(userId) ||
+                (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(userId));
+
+        if (!isOwner) {
+            // Check if user has messaged about the pet
+            final UUID finalPetId = pet.getId();
+            boolean hasMessagedAboutPet = messageRepository.findAll().stream()
+                    .filter(m -> finalPetId.equals(m.getPetId()))
+                    .anyMatch(m -> m.getSenderId().equals(userId) || m.getReceiverId().equals(userId));
+
+            if (!hasMessagedAboutPet) {
+                throw new IllegalArgumentException("User is not authorized to mark this pet as adopted");
+            }
+        }
+
+        pet.setStatus(PetStatus.ADOPTED);
+        pet = petRepository.save(pet);
+
+        // Send WebSocket notification about adoption
+        notifyPetStatusUpdate(pet);
+
+        return PetDTO.fromEntity(pet);
+    }
+
+    private void notifyPetStatusUpdate(Pet pet) {
+        WebSocketMessage wsMessage = WebSocketMessage.builder()
+                .type(WebSocketMessage.MessageType.PET_STATUS_UPDATE)
+                .payload(Map.of(
+                        "petId", pet.getId(),
+                        "status", pet.getStatus()))
+                .build();
+
+        // Get all users who have messaged about this pet
+        List<UUID> userIds = messageRepository.findAll().stream()
+                .filter(m -> pet.getId().equals(m.getPetId()))
+                .map(m -> List.of(m.getSenderId(), m.getReceiverId()))
+                .flatMap(List::stream)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // Also include the pet owner
+        userIds.add(pet.getCreatedByUserId());
+
+        // If the pet belongs to a shelter, include the shelter owner too
+        if (pet.getShelterId() != null && pet.getShelter() != null && pet.getShelter().getOwnerId() != null) {
+            userIds.add(pet.getShelter().getOwnerId());
+        }
+
+        // Send notification to all these users
+        userIds.forEach(userId -> messagingTemplate.convertAndSendToUser(
+                userId.toString(),
+                "/queue/messages",
+                wsMessage));
     }
 }

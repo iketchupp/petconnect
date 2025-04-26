@@ -30,6 +30,7 @@ public final class SecurityPaths {
             PublicEndpoint.get("/api/v1/pets/species"),
             PublicEndpoint.get("/api/v1/pets/breeds"),
             PublicEndpoint.get("/api/v1/pets/genders"),
+            PublicEndpoint.get("/api/v1/pets/{id}"),
             PublicEndpoint.get("/api/v1/pets/{id}/owner"),
             PublicEndpoint.get("/api/v1/pets/{id}/address"),
 
@@ -42,6 +43,9 @@ public final class SecurityPaths {
             // Locations
             PublicEndpoint.get("/api/v1/locations/cities"),
             PublicEndpoint.get("/api/v1/locations/countries"),
+
+            // WebSocket endpoint
+            PublicEndpoint.get("/api/v1/messages/pets/{id}/owner"),
 
             // Swagger UI paths - allow all methods
             PublicEndpoint.any("/api/v1/docs/**"),

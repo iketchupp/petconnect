@@ -100,6 +100,10 @@ public class Pet {
     @OneToOne(mappedBy = "pet", cascade = CascadeType.ALL, orphanRemoval = true)
     private PetAddress petAddress;
 
+    @OneToMany(mappedBy = "pet", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Message> messages = new ArrayList<>();
+
     public Address getAddress() {
         return petAddress != null ? petAddress.getAddress() : null;
     }

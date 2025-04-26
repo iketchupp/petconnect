@@ -68,9 +68,6 @@ public class ImageService {
         return response;
     }
 
-    /**
-     * Delete an image from both storage and database
-     */
     public void deleteImage(String key) {
         try {
             // Delete from S3/MinIO first

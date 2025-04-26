@@ -38,10 +38,17 @@ public class UserService {
     private final PetRepository petRepository;
     private final ShelterRepository shelterRepository;
 
-    public UserDTO getUser(String v) {
-        User user = userRepository.findByEmail(v)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return UserDTO.fromEntity(user);
+    public UserDTO getUser(String identifier) {
+        // Try to parse the identifier as a UUID first
+        try {
+            UUID userId = UUID.fromString(identifier);
+            return getUserById(userId);
+        } catch (IllegalArgumentException e) {
+            // If it's not a valid UUID, assume it's an email
+            User user = userRepository.findByEmail(identifier)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + identifier));
+            return UserDTO.fromEntity(user);
+        }
     }
 
     public UserDTO getUserById(UUID id) {

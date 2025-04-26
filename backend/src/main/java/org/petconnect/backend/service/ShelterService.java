@@ -341,14 +341,6 @@ public class ShelterService {
         return userService.getUserById(ownerId);
     }
 
-    /**
-     * Deletes a shelter and all associated data
-     * Only the shelter owner can delete the shelter
-     * 
-     * @param shelterId the shelter ID to delete
-     * @throws IllegalArgumentException if the shelter is not found or user is not
-     *                                  authorized
-     */
     @Transactional
     public void deleteShelter(UUID shelterId) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -85,8 +85,4 @@ public class User {
     @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Message> receivedMessages = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<ShelterMessageAssignment> messageAssignments = new ArrayList<>();
 }
