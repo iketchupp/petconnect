@@ -12,10 +12,11 @@ interface AuthStore {
   setError: (error: string | null) => void;
   setLoading: (isLoading: boolean) => void;
   isAuthenticated: () => boolean;
-  reset: () => Promise<void>;
   refresh: () => Promise<void>;
+  reset: () => Promise<void>;
   register: (data: UserRegister) => Promise<AuthResponse | ErrorResponse>;
   login: (data: UserLogin) => Promise<AuthResponse | ErrorResponse>;
+  logout: () => Promise<void>;
   reAuth: (data: UserLogin) => Promise<AuthResponse | ErrorResponse>;
 }
 
@@ -26,18 +27,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   setSession: (session) => set({ session }),
   setError: (error) => set({ error }),
   setLoading: (isLoading) => set({ isLoading }),
-  reset: async () => {
-    try {
-      set({ isLoading: true });
-      set({ session: null, error: null });
-      await logout();
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to logout',
-        isLoading: false,
-      });
-    }
-  },
   isAuthenticated: () => {
     return !!get().session;
   },
@@ -45,14 +34,20 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       const session = await getSession();
-      set({ session, isLoading: false });
+      if (session) {
+        set({ session, isLoading: false, error: null });
+      } else {
+        set({ session: null, isLoading: false, error: 'Failed to refresh session' });
+      }
     } catch (error) {
-      console.error(error);
       set({
         error: error instanceof Error ? error.message : 'Failed to refresh session',
         isLoading: false,
       });
     }
+  },
+  reset: async () => {
+    set({ session: null, isLoading: true, error: null });
   },
   register: async (data: UserRegister) => {
     try {
@@ -68,6 +63,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       return response;
     } catch (error) {
       return error as ErrorResponse;
+    }
+  },
+  logout: async () => {
+    try {
+      set({ isLoading: true });
+      set({ session: null, error: null });
+      await logout();
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to logout',
+        isLoading: false,
+      });
     }
   },
   reAuth: async (data: UserLogin) => {

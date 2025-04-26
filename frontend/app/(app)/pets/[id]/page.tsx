@@ -9,12 +9,14 @@ import { toast } from 'sonner';
 
 import { favoritePet, getPetIsFavorited, unFavoritePet } from '@/actions/favorites';
 import { getPetAddress, getPetById, getPetOwner } from '@/actions/pets';
+import { calculateAge, formatLocalDate } from '@/lib/date';
 import { cn, getFullName } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
+import { MessageModal } from '@/components/app/user/messages/message-modal';
 import { ImageOverlay } from '@/components/image-overlay';
 import { Loading } from '@/components/loading';
 
@@ -102,7 +104,7 @@ export default function PetDetailsPage() {
   }
 
   // Calculate age
-  const age = new Date().getFullYear() - new Date(pet.birthDate).getFullYear();
+  const age = calculateAge(pet.birthDate);
   const ageText = age === 0 ? 'Less than 1 year' : `${age} year${age > 1 ? 's' : ''}`;
 
   return (
@@ -199,7 +201,7 @@ export default function PetDetailsPage() {
                       <Calendar className="text-muted-foreground h-4 w-4" />
                       <span className="text-muted-foreground text-sm">Birth Date</span>
                     </div>
-                    <p className="font-medium">{new Date(pet.birthDate).toLocaleDateString()}</p>
+                    <p className="font-medium">{formatLocalDate(pet.birthDate)}</p>
                   </div>
 
                   <div className="space-y-2">
@@ -231,10 +233,7 @@ export default function PetDetailsPage() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2">
-                  <Button className="w-full">
-                    <MessageCircle className="mr-2 h-4 w-4" />
-                    Message
-                  </Button>
+                  <MessageModal pet={pet} recipient={petOwner} variant="default" fullWidth />
                   <Button
                     variant="outline"
                     className={cn('w-full', isFavorited && 'bg-secondary')}

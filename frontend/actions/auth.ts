@@ -5,6 +5,7 @@ import { redirect, RedirectType } from 'next/navigation';
 
 import { ErrorResponse, User } from '@/types/api';
 import { AuthResponse, UserLogin, UserRegister } from '@/types/auth';
+import { getCurrentUTCDate } from '@/lib/date';
 import { http } from '@/lib/http';
 
 export async function register(data: UserRegister): Promise<AuthResponse | ErrorResponse> {
@@ -31,7 +32,7 @@ export async function register(data: UserRegister): Promise<AuthResponse | Error
 
     // Handle unexpected errors
     return {
-      timestamp: new Date().toISOString(),
+      timestamp: getCurrentUTCDate(),
       status: 500,
       error: 'Internal Server Error',
       message: 'Something went wrong',
@@ -65,7 +66,7 @@ export async function login(data: UserLogin): Promise<AuthResponse | ErrorRespon
 
     // Handle unexpected errors
     return {
-      timestamp: new Date().toISOString(),
+      timestamp: getCurrentUTCDate(),
       status: 500,
       error: 'Internal Server Error',
       message: 'Something went wrong',

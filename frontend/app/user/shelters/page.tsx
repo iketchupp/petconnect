@@ -85,6 +85,19 @@ export default function UserSheltersPage() {
   const shelters = data.pages.flatMap((page) => page.shelters);
   const totalCount = data.pages[0].totalCount;
 
+  if (shelters.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
+        <Home className="text-muted-foreground size-12" />
+        <h2 className="text-lg font-semibold">No shelters found</h2>
+        <p className="text-muted-foreground">You haven&apos;t registered any shelters yet.</p>
+        <Button onClick={handleAddShelter}>
+          <Plus className="mr-2 h-4 w-4" />
+          Register Shelter
+        </Button>
+      </div>
+    );
+  }
   return (
     <>
       <div className="space-y-4 p-4">
@@ -101,19 +114,11 @@ export default function UserSheltersPage() {
           </Button>
         </div>
 
-        {shelters.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
-            <Home className="text-muted-foreground size-12" />
-            <h2 className="text-lg font-semibold">No shelters found</h2>
-            <p className="text-muted-foreground">You haven&apos;t registered any shelters yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {shelters.map((shelter) => (
-              <ShelterManageCard key={shelter.id} shelter={shelter} onEdit={handleEdit} onDelete={handleDelete} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {shelters.map((shelter) => (
+            <ShelterManageCard key={shelter.id} shelter={shelter} onEdit={handleEdit} onDelete={handleDelete} />
+          ))}
+        </div>
 
         <div ref={ref} className="flex justify-center">
           {hasNextPage && (

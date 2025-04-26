@@ -1,4 +1,4 @@
-import { CreatePetData, Pet, PetsResponse, User } from '@/types/api';
+import { CreatePetData, Pet, PetsResponse, PetStatus, User } from '@/types/api';
 import { http } from '@/lib/http';
 
 export type PetFilters = {
@@ -167,6 +167,26 @@ export async function deletePet(petId: string) {
     return response.data;
   } catch (error) {
     console.error('Error deleting pet:', error);
+    throw error;
+  }
+}
+
+export async function updatePetStatus(petId: string, status: PetStatus): Promise<Pet> {
+  try {
+    const response = await http.put(`/pets/${petId}/status/${status}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating pet status:', error);
+    throw error;
+  }
+}
+
+export async function markPetAsAdopted(petId: string): Promise<Pet> {
+  try {
+    const response = await http.put(`/pets/${petId}/adopt`);
+    return response.data;
+  } catch (error) {
+    console.error('Error marking pet as adopted:', error);
     throw error;
   }
 }

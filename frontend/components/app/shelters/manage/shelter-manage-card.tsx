@@ -60,19 +60,7 @@ export function ShelterManageCard({ shelter, onEdit, onDelete }: ShelterManageCa
         </div>
       </CardContent>
 
-      <CardFooter className="mt-auto flex justify-between p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="mr-2 flex-1"
-          onClick={(e) => {
-            e.preventDefault();
-            onEdit(shelter.id);
-          }}
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </Button>
+      <CardFooter className="mt-auto flex p-4">
         <Button
           variant="outline"
           size="sm"

@@ -24,7 +24,7 @@ interface UserDropdownProps {
 }
 
 export function UserDropdown({ children, side = 'right', sideOffset = 4, align = 'end' }: UserDropdownProps) {
-  const { session, reset } = useAuthStore();
+  const { session, logout } = useAuthStore();
 
   if (!session) {
     return null;
@@ -93,7 +93,7 @@ export function UserDropdown({ children, side = 'right', sideOffset = 4, align =
           className="hover:cursor-pointer"
           onSelect={(e) => {
             e.preventDefault();
-            reset();
+            logout();
           }}
         >
           <LogOut className="mr-2 size-4" />

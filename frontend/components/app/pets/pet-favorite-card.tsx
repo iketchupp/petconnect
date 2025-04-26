@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { favoritePet, getPetIsFavorited, unFavoritePet } from '@/actions/favorites';
 import { getPetAddress, getPetOwner } from '@/actions/pets';
 import { Pet, PetStatus } from '@/types/api';
+import { calculateAge } from '@/lib/date';
 import { cn, getFullName } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,7 @@ export function FavoritePetCard({ pet }: FavoritePetCardProps) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   // Calculate age from birthDate
-  const age = new Date().getFullYear() - new Date(pet.birthDate).getFullYear();
+  const age = calculateAge(pet.birthDate);
   const ageText = age === 0 ? 'Less than 1 year' : `${age} year${age > 1 ? 's' : ''}`;
 
   const { data: petOwner } = useQuery({

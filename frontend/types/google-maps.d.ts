@@ -1,8 +1,3 @@
-/**
- * Type definitions for Google Maps JavaScript API
- * Specifically focuses on the Places API functionality
- */
-
 // Define Google Maps types
 export namespace GoogleMapsTypes {
   export interface MapsEventListener {

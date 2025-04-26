@@ -3,7 +3,15 @@ import { PawPrint } from 'lucide-react';
 
 import { navConfig } from '@/config/nav.config';
 import { siteConfig } from '@/config/site.config';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenuButton } from '@/components/ui/sidebar';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { NavUser } from '@/components/app/user/layout/sidebar/nav-user';
 
 import { NavGroup } from './nav-group';
@@ -31,12 +39,12 @@ export function UserSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) 
           }))}
         />
         <NavGroup
-          label="Pages"
-          items={navConfig.sidebar.pages.map((item) => ({
+          items={navConfig.sidebar.secondary.map((item) => ({
             title: item.title,
             href: `/user${item.href}`,
             icon: item.icon,
           }))}
+          className="mt-auto"
         />
       </SidebarContent>
       <SidebarFooter className="pl-3">

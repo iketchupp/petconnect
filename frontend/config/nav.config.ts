@@ -35,15 +35,7 @@ export const navConfig = {
     },
   ],
   sidebar: {
-    // /user
     main: [
-      {
-        title: 'Profile',
-        href: '/',
-        icon: User,
-      },
-    ],
-    pages: [
       {
         title: 'My Pets',
         href: '/pets',
@@ -63,6 +55,13 @@ export const navConfig = {
         title: 'Messages',
         href: '/messages',
         icon: MessageSquare,
+      },
+    ],
+    secondary: [
+      {
+        title: 'Profile',
+        href: '/',
+        icon: User,
       },
     ],
   },

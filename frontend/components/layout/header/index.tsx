@@ -1,3 +1,4 @@
+import { MessageNotifications } from '@/components/app/user/messages/notifications';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 
 import { HeaderBackground } from './background';
@@ -12,7 +13,10 @@ export function Header() {
         <MainNav />
         <MobileNav />
 
-        <UserMenu />
+        <div className="flex items-center gap-2">
+          <MessageNotifications />
+          <UserMenu />
+        </div>
 
         <HeaderBackground />
       </div>

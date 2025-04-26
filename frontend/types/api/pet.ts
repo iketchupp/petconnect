@@ -11,6 +11,7 @@ export interface Pet {
   status: PetStatus;
   shelterId?: string;
   shelterName?: string;
+  ownerId?: string;
   createdAt: string;
   imageUrls: string[];
   address: Address;

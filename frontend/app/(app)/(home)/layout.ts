@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 export default function HomeLayout({ children }: { children: React.ReactNode }) {
   const initialize = useAuthStore((state) => state.refresh);
+  const reset = useAuthStore((state) => state.reset);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -14,14 +15,17 @@ export default function HomeLayout({ children }: { children: React.ReactNode }) 
     const error = searchParams.get('error');
     if (error === 'unauthorized') {
       toast.error('You are not authorized to access this page.');
+      reset();
       router.replace('/');
     }
     if (error === 'no_token') {
       toast.error('No token found.');
+      reset();
       router.replace('/');
     }
     if (error === 'auth_failed') {
       toast.error('Authentication failed.');
+      reset();
       router.replace('/');
     }
   }, [searchParams]);

@@ -15,6 +15,10 @@ export function getFullName(user: User) {
   return `${user.firstName} ${user.lastName}`;
 }
 
+export function getInitials(user: User) {
+  return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+}
+
 export function getWebsiteUrl(url: string) {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;

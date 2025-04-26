@@ -8,6 +8,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Building, Calendar, Globe, Mail, MapPin, Phone, User } from 'lucide-react';
 
 import { getShelterById, getShelterOwner, getShelterPets } from '@/actions/shelters';
+import { formatLocalDate } from '@/lib/date';
 import { cn, getFullName, getWebsiteUrl, stripProtocol } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -98,7 +99,7 @@ export default function ShelterDetailPage() {
                 <div className="text-muted-foreground flex flex-wrap justify-center gap-4 text-sm md:justify-start">
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    <span>Joined {new Date(shelter.createdAt).toLocaleDateString()}</span>
+                    <span>Joined {formatLocalDate(shelter.createdAt)}</span>
                   </div>
                 </div>
               </div>

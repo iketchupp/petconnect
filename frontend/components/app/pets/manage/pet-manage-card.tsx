@@ -4,6 +4,7 @@ import { Home, MapPin, Pencil, Trash } from 'lucide-react';
 
 import { getPetFullAddress } from '@/actions/pets';
 import { Pet } from '@/types/api';
+import { calculateAge } from '@/lib/date';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ interface PetManageCardProps {
 
 export function PetManageCard({ pet, onEdit, onDelete }: PetManageCardProps) {
   // Calculate age from birthDate
-  const age = new Date().getFullYear() - new Date(pet.birthDate).getFullYear();
+  const age = calculateAge(pet.birthDate);
   const ageText = age === 0 ? 'Less than 1 year' : `${age} year${age > 1 ? 's' : ''}`;
 
   const { data: address } = useQuery({
@@ -104,19 +105,7 @@ export function PetManageCard({ pet, onEdit, onDelete }: PetManageCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="mt-auto flex justify-between p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="mr-2 flex-1"
-          onClick={(e) => {
-            e.preventDefault();
-            onEdit(pet.id);
-          }}
-        >
-          <Pencil className="mr-2 h-4 w-4" />
-          Edit
-        </Button>
+      <CardFooter className="mt-auto flex p-4">
         <Button
           variant="outline"
           size="sm"
