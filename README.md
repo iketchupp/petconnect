@@ -5,55 +5,67 @@
 ```mermaid
 erDiagram
     User ||--o{ Shelter : owns
-    User ||--o{ ShelterMember : "is member of"
     User ||--o{ Pet : creates
-    User ||--o{ Bookmark : has
+    User ||--o{ Favorite : has
     User ||--o{ Message : sends
     User }|--o{ Message : receives
-    User ||--o{ ShelterMessageAssignment : "is assigned"
     User ||--o| AvatarImage : has
 
-    Shelter ||--o{ ShelterMember : has
     Shelter ||--o{ Pet : houses
-    Shelter ||--o{ Message : "receives via"
+    Shelter ||--o{ Message : receives
     Shelter ||--o| AvatarImage : has
-    Shelter ||--o{ Address : has
+    Shelter ||--o| ShelterAddress : has
 
     Pet ||--o{ PetImage : has
-    Pet ||--o{ Bookmark : "is bookmarked in"
+    Pet ||--o{ Favorite : "is bookmarked in"
+    Pet ||--o| PetAddress : has
+    Pet ||--o{ Message : references
 
-    Image ||--o| AvatarImage : "is used in"
-    Image ||--o| PetImage : "is used in"
+    Image ||--o| AvatarImage : "used in"
+    Image ||--o| PetImage : "used in"
 
-    Message ||--o| ShelterMessageAssignment : "is assigned in"
+    Address ||--o| ShelterAddress : "used in"
+    Address ||--o| PetAddress : "used in"
 
     User {
-        String id PK "UUID"
+        UUID id PK
         String firstName
         String lastName
-        String username "UNIQUE"
-        String email "UNIQUE"
+        String username UK
+        String email UK
         String passwordHash
-        String avatarImageId FK "UUID, UNIQUE"
-        DateTime createdAt
+        UUID avatarImageId FK
+        ZonedDateTime createdAt
     }
 
     Shelter {
-        String id PK "UUID"
+        UUID id PK
         String name
         String description
         String phone
         String email
         String website
-        String ownerId FK "UUID"
-        String avatarImageId FK "UUID, UNIQUE"
-        String addressId FK "UUID"
-        DateTime createdAt
+        UUID ownerId FK
+        UUID avatarImageId FK
+        ZonedDateTime createdAt
+    }
+
+    Pet {
+        UUID id PK
+        String name
+        String description
+        String species
+        String breed
+        String gender
+        LocalDate birthDate
+        PetStatus status
+        UUID createdByUserId FK
+        UUID shelterId FK
+        ZonedDateTime createdAt
     }
 
     Address {
-        String id PK "UUID"
-        String shelterId FK "UUID"
+        UUID id PK
         String address1
         String address2
         String formattedAddress
@@ -61,74 +73,62 @@ erDiagram
         String region
         String postalCode
         String country
-        Float lat
-        Float lng
-        DateTime createdAt
-    }
-
-    ShelterMember {
-        String shelterId PK,FK "UUID"
-        String userId PK,FK "UUID"
-        DateTime joinedAt
-    }
-
-    Pet {
-        String id PK "UUID"
-        String name
-        String description
-        String species
-        String breed
-        String gender
-        DateTime birthDate
-        PetStatus status "ENUM"
-        String createdByUserId FK "UUID"
-        String shelterId FK "UUID"
-        DateTime createdAt
+        Double lat
+        Double lng
+        ZonedDateTime createdAt
     }
 
     Image {
-        String id PK "UUID"
-        String url
-        String key "UNIQUE"
+        UUID id PK
+        String key UK
         String bucket
         String fileType
-        BigInt fileSize
-        DateTime uploadedAt
+        Long fileSize
+        ZonedDateTime uploadedAt
     }
 
     AvatarImage {
-        String id PK "UUID"
-        String imageId FK "UUID, UNIQUE"
-        DateTime createdAt
+        UUID id PK
+        UUID imageId FK
+        ZonedDateTime createdAt
     }
 
     PetImage {
-        String id PK "UUID"
-        String petId FK "UUID"
-        String imageId FK "UUID, UNIQUE"
+        UUID id PK
+        UUID petId FK
+        UUID imageId FK
         Boolean isPrimary
-        DateTime createdAt
+        ZonedDateTime createdAt
     }
 
-    Bookmark {
-        String userId PK,FK "UUID"
-        String petId PK,FK "UUID"
-        DateTime createdAt
+    Favorite {
+        UUID userId PK,FK
+        UUID petId PK,FK
+        ZonedDateTime createdAt
     }
 
     Message {
-        String id PK "UUID"
-        String senderId FK "UUID"
-        String receiverId FK "UUID"
+        UUID id PK
+        UUID senderId FK
+        UUID receiverId FK
         String content
         Boolean isRead
-        String shelterId FK "UUID"
-        DateTime sentAt
+        UUID shelterId FK
+        UUID petId FK
+        ZonedDateTime sentAt
     }
 
-    ShelterMessageAssignment {
-        String messageId PK,FK "UUID"
-        String userId FK "UUID"
-        DateTime assignedAt
+    ShelterAddress {
+        UUID id PK
+        UUID shelterId FK
+        UUID addressId FK
+        ZonedDateTime createdAt
+    }
+
+    PetAddress {
+        UUID id PK
+        UUID petId FK
+        UUID addressId FK
+        ZonedDateTime createdAt
     }
 ```
