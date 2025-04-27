@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -67,19 +68,95 @@ public class DataSeeder implements CommandLineRunner {
     private final Random random = new Random();
     private final Faker faker = new Faker();
 
+    // Define country data with lat/lng bounds and address formats
+    private static final List<Map<String, Object>> COUNTRIES = List.of(
+            Map.of(
+                    "name", "United States",
+                    "code", "US",
+                    "minLat", 24.0, "maxLat", 49.0,
+                    "minLng", -125.0, "maxLng", -66.0,
+                    "cities", List.of("New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "Austin"),
+                    "regions", List.of("NY", "CA", "TX", "FL", "IL", "PA", "OH", "GA", "NC", "MI"),
+                    "postalFormat", "\\d{5}"
+            ),
+            Map.of(
+                    "name", "Canada",
+                    "code", "CA",
+                    "minLat", 42.0, "maxLat", 57.0,
+                    "minLng", -141.0, "maxLng", -52.0,
+                    "cities", List.of("Toronto", "Montreal", "Vancouver", "Calgary", "Edmonton", "Ottawa", "Winnipeg", "Quebec City", "Hamilton", "Kitchener"),
+                    "regions", List.of("ON", "QC", "BC", "AB", "MB", "SK", "NS", "NB", "NL", "PE"),
+                    "postalFormat", "[A-Z]\\d[A-Z] \\d[A-Z]\\d"
+            ),
+            Map.of(
+                    "name", "United Kingdom",
+                    "code", "UK",
+                    "minLat", 49.0, "maxLat", 59.0,
+                    "minLng", -8.0, "maxLng", 2.0,
+                    "cities", List.of("London", "Birmingham", "Manchester", "Glasgow", "Liverpool", "Bristol", "Edinburgh", "Cardiff", "Leeds", "Newcastle"),
+                    "regions", List.of("England", "Scotland", "Wales", "Northern Ireland"),
+                    "postalFormat", "[A-Z]{1,2}\\d[A-Z\\d]? \\d[A-Z]{2}"
+            ),
+            Map.of(
+                    "name", "Australia",
+                    "code", "AU",
+                    "minLat", -43.0, "maxLat", -10.0,
+                    "minLng", 113.0, "maxLng", 154.0,
+                    "cities", List.of("Sydney", "Melbourne", "Brisbane", "Perth", "Adelaide", "Gold Coast", "Canberra", "Newcastle", "Wollongong", "Hobart"),
+                    "regions", List.of("NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"),
+                    "postalFormat", "\\d{4}"
+            ),
+            Map.of(
+                    "name", "Germany",
+                    "code", "DE",
+                    "minLat", 47.0, "maxLat", 55.0,
+                    "minLng", 5.0, "maxLng", 15.0,
+                    "cities", List.of("Berlin", "Hamburg", "Munich", "Cologne", "Frankfurt", "Stuttgart", "Düsseldorf", "Leipzig", "Dortmund", "Essen"),
+                    "regions", List.of("Bavaria", "North Rhine-Westphalia", "Baden-Württemberg", "Lower Saxony", "Hesse", "Saxony", "Rhineland-Palatinate", "Berlin", "Schleswig-Holstein", "Brandenburg"),
+                    "postalFormat", "\\d{5}"
+            ),
+            Map.of(
+                    "name", "Japan",
+                    "code", "JP",
+                    "minLat", 30.0, "maxLat", 46.0,
+                    "minLng", 129.0, "maxLng", 146.0,
+                    "cities", List.of("Tokyo", "Yokohama", "Osaka", "Nagoya", "Sapporo", "Kobe", "Kyoto", "Fukuoka", "Kawasaki", "Saitama"),
+                    "regions", List.of("Tokyo", "Kanagawa", "Osaka", "Aichi", "Hokkaido", "Hyogo", "Kyoto", "Fukuoka", "Saitama", "Chiba"),
+                    "postalFormat", "\\d{3}-\\d{4}"
+            ),
+            Map.of(
+                    "name", "Brazil",
+                    "code", "BR",
+                    "minLat", -33.0, "maxLat", 5.0,
+                    "minLng", -74.0, "maxLng", -34.0,
+                    "cities", List.of("São Paulo", "Rio de Janeiro", "Brasília", "Salvador", "Fortaleza", "Belo Horizonte", "Manaus", "Curitiba", "Recife", "Porto Alegre"),
+                    "regions", List.of("São Paulo", "Rio de Janeiro", "Distrito Federal", "Bahia", "Ceará", "Minas Gerais", "Amazonas", "Paraná", "Pernambuco", "Rio Grande do Sul"),
+                    "postalFormat", "\\d{5}-\\d{3}"
+            ),
+            Map.of(
+                    "name", "South Africa",
+                    "code", "ZA",
+                    "minLat", -34.0, "maxLat", -22.0,
+                    "minLng", 16.0, "maxLng", 33.0,
+                    "cities", List.of("Johannesburg", "Cape Town", "Durban", "Pretoria", "Port Elizabeth", "Bloemfontein", "East London", "Kimberley", "Pietermaritzburg", "Polokwane"),
+                    "regions", List.of("Gauteng", "Western Cape", "KwaZulu-Natal", "Eastern Cape", "Free State", "North West", "Mpumalanga", "Limpopo", "Northern Cape"),
+                    "postalFormat", "\\d{4}"
+            )
+    );
+
     private static final String[] SAMPLE_PET_IMAGES = {
-            "sample/pets/dog1.jpg",
-            "sample/pets/dog2.jpg",
-            "sample/pets/dog3.jpg",
-            "sample/pets/cat1.jpg",
-            "sample/pets/cat2.jpg",
-            "sample/pets/cat3.jpg"
+        "sample/pets/dog1.jpg",
+        "sample/pets/dog2.jpg",
+        "sample/pets/dog3.jpg",
+        "sample/pets/cat1.jpg",
+        "sample/pets/cat2.jpg",
+        "sample/pets/cat3.jpg"
     };
 
     private static final String[] SAMPLE_AVATAR_IMAGES = {
-            "sample/avatars/avatar1.jpg",
-            "sample/avatars/avatar2.jpg",
-            "sample/avatars/avatar3.jpg"
+        "sample/avatars/avatar1.jpg",
+        "sample/avatars/avatar2.jpg",
+        "sample/avatars/avatar3.jpg"
     };
 
     @Transactional
@@ -110,6 +187,70 @@ public class DataSeeder implements CommandLineRunner {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload sample image: " + resourcePath, e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getRandomCountry() {
+        return (Map<String, Object>) COUNTRIES.get(random.nextInt(COUNTRIES.size()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Address createRandomAddress(Map<String, Object> country) {
+        double minLat = (double) country.get("minLat");
+        double maxLat = (double) country.get("maxLat");
+        double minLng = (double) country.get("minLng");
+        double maxLng = (double) country.get("maxLng");
+
+        List<String> cities = (List<String>) country.get("cities");
+        List<String> regions = (List<String>) country.get("regions");
+
+        String city = cities.get(random.nextInt(cities.size()));
+        String region = regions.get(random.nextInt(regions.size()));
+
+        String postalCode;
+        if (country.get("name").equals("United Kingdom")) {
+            postalCode = faker.regexify("[A-Z]{1,2}\\d[A-Z\\d]? \\d[A-Z]{2}");
+        } else if (country.get("name").equals("Canada")) {
+            postalCode = faker.regexify("[A-Z]\\d[A-Z] \\d[A-Z]\\d");
+        } else if (country.get("name").equals("Japan")) {
+            postalCode = faker.regexify("\\d{3}-\\d{4}");
+        } else if (country.get("name").equals("Brazil")) {
+            postalCode = faker.regexify("\\d{5}-\\d{3}");
+        } else {
+            postalCode = faker.regexify("\\d{5}");
+        }
+
+        // Generate random lat/lng within country bounds
+        double lat = minLat + (maxLat - minLat) * random.nextDouble();
+        double lng = minLng + (maxLng - minLng) * random.nextDouble();
+
+        Address address = Address.builder()
+                .address1(faker.address().streetAddress())
+                .city(city)
+                .region(region)
+                .postalCode(postalCode)
+                .country((String) country.get("name"))
+                .lat(lat)
+                .lng(lng)
+                .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
+                .build();
+
+        // Format address according to country convention
+        String formattedAddress;
+        if (country.get("name").equals("United Kingdom")) {
+            formattedAddress = String.format("%s, %s, %s, %s",
+                    address.getAddress1(), address.getCity(), address.getRegion(), address.getPostalCode());
+        } else if (country.get("name").equals("Japan")) {
+            formattedAddress = String.format("%s, %s %s, %s",
+                    address.getPostalCode(), address.getRegion(), address.getCity(), address.getAddress1());
+        } else {
+            formattedAddress = String.format("%s, %s, %s %s, %s",
+                    address.getAddress1(), address.getCity(), address.getRegion(),
+                    address.getPostalCode(), address.getCountry());
+        }
+
+        address.setFormattedAddress(formattedAddress);
+        return address;
     }
 
     @Override
@@ -171,18 +312,23 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         shelter1 = shelterRepository.save(shelter1);
 
-        // Create address for first shelter
+        // Create address for first shelter - USA
+        Map<String, Object> usaCountry = COUNTRIES.stream()
+                .filter(c -> c.get("name").equals("United States"))
+                .findFirst()
+                .orElse(getRandomCountry());
+
         Address address1 = Address.builder()
                 .address1("123 Main St")
                 .city("New York")
                 .region("NY")
                 .postalCode("10001")
-                .country("United States")
+                .country((String) usaCountry.get("name"))
                 .lat(40.7128)
                 .lng(-74.0060)
                 .createdAt(DateTimeUtil.nowUTC())
                 .build();
-        address1.setFormattedAddress("123 Main St, New York, NY 10001");
+        address1.setFormattedAddress("123 Main St, New York, NY 10001, United States");
         address1 = addressRepository.save(address1);
 
         // Create shelter address relationship
@@ -206,18 +352,23 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
         shelter2 = shelterRepository.save(shelter2);
 
-        // Create address for second shelter
+        // Create address for second shelter - UK
+        Map<String, Object> ukCountry = COUNTRIES.stream()
+                .filter(c -> c.get("name").equals("United Kingdom"))
+                .findFirst()
+                .orElse(getRandomCountry());
+
         Address address2 = Address.builder()
-                .address1("456 Park Ave")
-                .city("Los Angeles")
-                .region("CA")
-                .postalCode("90001")
-                .country("United States")
-                .lat(34.0522)
-                .lng(-118.2437)
+                .address1("45 Abbey Road")
+                .city("London")
+                .region("England")
+                .postalCode("NW8 9AY")
+                .country((String) ukCountry.get("name"))
+                .lat(51.532)
+                .lng(-0.177)
                 .createdAt(DateTimeUtil.nowUTC())
                 .build();
-        address2.setFormattedAddress("456 Park Ave, Los Angeles, CA 90001");
+        address2.setFormattedAddress("45 Abbey Road, London, England, NW8 9AY, United Kingdom");
         address2 = addressRepository.save(address2);
 
         // Create shelter address relationship
@@ -310,20 +461,9 @@ public class DataSeeder implements CommandLineRunner {
                 shelterRepository.save(shelter);
             }
 
-            // Create address for shelter
-            Address address = Address.builder()
-                    .address1(faker.address().streetAddress())
-                    .city(faker.address().city())
-                    .region(faker.address().stateAbbr())
-                    .postalCode(faker.address().zipCode())
-                    .country("United States")
-                    .lat(faker.number().randomDouble(6, 25, 49))
-                    .lng(faker.number().randomDouble(6, -125, -65))
-                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
-                    .build();
-            address.setFormattedAddress(String.format("%s, %s, %s %s",
-                    address.getAddress1(), address.getCity(), address.getRegion(),
-                    address.getPostalCode()));
+            // Create address for shelter with random country
+            Map<String, Object> country = getRandomCountry();
+            Address address = createRandomAddress(country);
             address = addressRepository.save(address);
 
             // Create shelter address relationship
@@ -369,19 +509,8 @@ public class DataSeeder implements CommandLineRunner {
 
         // Create address for user pets (not shelter pets)
         if (shelterId == null) {
-            Address address = Address.builder()
-                    .address1(faker.address().streetAddress())
-                    .city(faker.address().city())
-                    .region(faker.address().stateAbbr())
-                    .postalCode(faker.address().zipCode())
-                    .country("United States")
-                    .lat(faker.number().randomDouble(6, 25, 49))
-                    .lng(faker.number().randomDouble(6, -125, -65))
-                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
-                    .build();
-            address.setFormattedAddress(String.format("%s, %s, %s %s",
-                    address.getAddress1(), address.getCity(), address.getRegion(),
-                    address.getPostalCode()));
+            Map<String, Object> country = getRandomCountry();
+            Address address = createRandomAddress(country);
             address = addressRepository.save(address);
 
             PetAddress petAddress = PetAddress.builder()
