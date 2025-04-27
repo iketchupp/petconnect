@@ -1,10 +1,10 @@
 import Image from 'next/image';
 
-import { CallToAction } from '@/components/app/home/call-to-action';
-import { FeaturedPets } from '@/components/app/home/featured-pets';
-import { Hero } from '@/components/app/home/hero';
-import { HowItWorks } from '@/components/app/home/how-it-works';
-import { Testimonials } from '@/components/app/home/testimonials';
+import { CallToAction } from '@/components/home/call-to-action';
+import { FeaturedPets } from '@/components/home/featured-pets';
+import { Hero } from '@/components/home/hero';
+import { HowItWorks } from '@/components/home/how-it-works';
+import { Testimonials } from '@/components/home/testimonials';
 
 export default function Home() {
   return (

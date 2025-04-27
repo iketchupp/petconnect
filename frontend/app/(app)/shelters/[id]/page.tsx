@@ -16,8 +16,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PetCard } from '@/components/app/pets/pet-card';
 import { Loading } from '@/components/loading';
+import { PetCard } from '@/components/pets/pet-card';
 
 export default function ShelterDetailPage() {
   const { id } = useParams();
@@ -67,7 +67,7 @@ export default function ShelterDetailPage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold">Shelter Not Found</h1>
           <p className="text-muted-foreground mt-2">
-            The shelter you're looking for doesn't exist or has been removed.
+            The shelter you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
         </div>
       </div>
@@ -237,7 +237,7 @@ export default function ShelterDetailPage() {
               <CardContent>
                 <Building className="mx-auto mb-4 h-12 w-12 opacity-50" />
                 <h3 className="mb-2 text-lg font-medium">No Pets Available</h3>
-                <p className="text-muted-foreground">This shelter doesn't have any pets listed right now.</p>
+                <p className="text-muted-foreground">This shelter doesn&apos;t have any pets listed right now.</p>
               </CardContent>
             </Card>
           ) : (

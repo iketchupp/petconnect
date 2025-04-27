@@ -21,8 +21,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ShelterManageCard } from '@/components/app/shelters/manage/shelter-manage-card';
 import { Loading } from '@/components/loading';
+import { ShelterManageCard } from '@/components/shelters/manage/shelter-manage-card';
 
 export default function UserSheltersPage() {
   const router = useRouter();

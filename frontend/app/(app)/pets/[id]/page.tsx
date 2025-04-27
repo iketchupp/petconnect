@@ -16,9 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Separator } from '@/components/ui/separator';
-import { MessageModal } from '@/components/app/user/messages/message-modal';
 import { ImageOverlay } from '@/components/image-overlay';
 import { Loading } from '@/components/loading';
+import { MessageModal } from '@/components/user/messages/message-modal';
 
 export default function PetDetailsPage() {
   const queryClient = useQueryClient();
@@ -97,7 +97,9 @@ export default function PetDetailsPage() {
       <div className="container mx-auto flex h-full flex-1 flex-col items-center justify-center px-4 py-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Pet Not Found</h1>
-          <p className="text-muted-foreground mt-2">The pet you're looking for doesn't exist or has been removed.</p>
+          <p className="text-muted-foreground mt-2">
+            The pet you&apos;re looking for doesn&apos;t exist or has been removed.
+          </p>
         </div>
       </div>
     );

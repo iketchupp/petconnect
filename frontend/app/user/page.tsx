@@ -5,9 +5,9 @@ import { useAuthStore } from '@/stores/auth-store';
 import { toast } from 'sonner';
 
 import { http } from '@/lib/http';
-import { ImageCropper } from '@/components/app/user/image-cropper';
-import { ProfileForm } from '@/components/app/user/profile-form';
-import { ProfileHeader } from '@/components/app/user/profile-header';
+import { ImageCropper } from '@/components/user/image-cropper';
+import { ProfileForm } from '@/components/user/profile-form';
+import { ProfileHeader } from '@/components/user/profile-header';
 
 export default function UserProfilePage() {
   const { session, refresh } = useAuthStore();

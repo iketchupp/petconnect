@@ -8,8 +8,8 @@ import { useInView } from 'react-intersection-observer';
 import { getFavoritedPets } from '@/actions/favorites';
 import { PetsResponse } from '@/types/api';
 import { Button } from '@/components/ui/button';
-import { FavoritePetCard } from '@/components/app/pets/pet-favorite-card';
 import { Loading } from '@/components/loading';
+import { FavoritePetCard } from '@/components/pets/pet-favorite-card';
 
 export default function FavoritesPage() {
   const { ref, inView } = useInView();

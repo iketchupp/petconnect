@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
-import { Heart, Home, LayoutDashboard, LogOut, MessageSquare, PawPrint, User } from 'lucide-react';
+import { Heart, Home, LayoutDashboard, LogOut, MessageSquare, Monitor, Moon, PawPrint, Sun, User } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
 import { getAbbreviation } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +26,13 @@ interface UserDropdownProps {
 
 export function UserDropdown({ children, side = 'right', sideOffset = 4, align = 'end' }: UserDropdownProps) {
   const { session, logout } = useAuthStore();
+  const { theme, setTheme } = useTheme();
+
+  const cycleTheme = () => {
+    if (theme === 'light') setTheme('dark');
+    else if (theme === 'dark') setTheme('system');
+    else setTheme('light');
+  };
 
   if (!session) {
     return null;
@@ -55,15 +63,6 @@ export function UserDropdown({ children, side = 'right', sideOffset = 4, align =
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link href="/user">
-              <User className="mr-2 size-4" />
-              <span>Profile</span>
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem className="hover:cursor-pointer" asChild>
             <Link href="/user/pets">
               <PawPrint className="mr-2 size-4" />
               <span>My Pets</span>
@@ -89,16 +88,43 @@ export function UserDropdown({ children, side = 'right', sideOffset = 4, align =
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="hover:cursor-pointer"
-          onSelect={(e) => {
-            e.preventDefault();
-            logout();
-          }}
-        >
-          <LogOut className="mr-2 size-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem className="hover:cursor-pointer" asChild>
+            <Link href="/user">
+              <User className="mr-2 size-4" />
+              <span>Profile</span>
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <div className="flex items-center">
+          <DropdownMenuItem
+            className="flex-1 hover:cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              logout();
+            }}
+          >
+            <LogOut className="mr-2 size-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="ml-0.5 p-2 hover:cursor-pointer"
+            onSelect={(e) => {
+              e.preventDefault();
+              cycleTheme();
+            }}
+          >
+            {theme === 'dark' ? (
+              <Moon className="size-4" />
+            ) : theme === 'light' ? (
+              <Sun className="size-4" />
+            ) : (
+              <Monitor className="size-4" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

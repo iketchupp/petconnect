@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { UserHeader } from '@/components/app/user/layout/header';
-import { UserSidebar } from '@/components/app/user/layout/sidebar';
+import { InsetHeader } from '@/components/layout/inset-header';
+import { UserSidebar } from '@/components/layout/sidebar';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   const { session, isLoading } = useAuthStore();
@@ -23,7 +23,7 @@ export default function UserLayout({ children }: { children: React.ReactNode }) 
       <UserSidebar />
       <SidebarInset className="border">
         <div className="relative flex h-full flex-col rounded-lg">
-          <UserHeader />
+          <InsetHeader />
           <div className="flex-1 overflow-y-auto rounded-b-lg">{children}</div>
         </div>
       </SidebarInset>

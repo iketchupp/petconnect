@@ -8,9 +8,9 @@ import { useInView } from 'react-intersection-observer';
 import { getPets, PetFilters } from '@/actions/pets';
 import { PetsResponse } from '@/types/api';
 import { Button } from '@/components/ui/button';
-import { PetCard } from '@/components/app/pets/pet-card';
-import { PetFiltersComponent } from '@/components/app/pets/pet-filters';
 import { Loading } from '@/components/loading';
+import { PetCard } from '@/components/pets/pet-card';
+import { PetFiltersComponent } from '@/components/pets/pet-filters';
 
 export default function PetsPage() {
   const { ref, inView } = useInView();

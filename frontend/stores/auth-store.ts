@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     }
   },
   reset: async () => {
-    set({ session: null, isLoading: true, error: null });
+    set({ session: null, isLoading: false, error: null });
   },
   register: async (data: UserRegister) => {
     try {

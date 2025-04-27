@@ -22,14 +22,7 @@ export const metadata: Metadata = {
   title: siteConfig.name,
   description: siteConfig.description,
   metadataBase: new URL(siteConfig.url),
-  keywords: ['PetConnect', 'Pet', 'Connect'],
-  creator: 'iketchupp',
-  authors: [
-    {
-      name: 'iketchupp',
-      url: 'https://github.com/iketchupp',
-    },
-  ],
+  keywords: ['PetConnect', 'Pet', 'Connect', 'pet adoption', 'adoption'],
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon-16x16.png',

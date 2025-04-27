@@ -11,11 +11,11 @@ import { createPet, uploadPetImages } from '@/actions/pets';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { AddressForm } from '@/components/address-form';
-import { PetBasicInfo } from '@/components/app/pets/manage/new/pet-basic-info';
-import { PetDetailsFields } from '@/components/app/pets/manage/new/pet-details-fields';
-import { PetImageUpload } from '@/components/app/pets/manage/new/pet-image-upload';
-import { ShelterSelect } from '@/components/app/pets/manage/new/shelter-select';
-import { petFormSchema, PetFormValues } from '@/components/app/pets/manage/new/types';
+import { PetBasicInfo } from '@/components/pets/manage/new/pet-basic-info';
+import { PetDetailsFields } from '@/components/pets/manage/new/pet-details-fields';
+import { PetImageUpload } from '@/components/pets/manage/new/pet-image-upload';
+import { ShelterSelect } from '@/components/pets/manage/new/shelter-select';
+import { petFormSchema, PetFormValues } from '@/components/pets/manage/new/types';
 
 export default function NewPetPage() {
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function NewPetPage() {
   const [orderedImages, setOrderedImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPersonalPet, setIsPersonalPet] = useState(false);
+  const [buttonText, setButtonText] = useState('Register Pet');
 
   const form = useForm<PetFormValues>({
     resolver: zodResolver(petFormSchema),
@@ -54,6 +55,7 @@ export default function NewPetPage() {
   const onSubmit = async (data: PetFormValues) => {
     try {
       setIsSubmitting(true);
+      setButtonText('Registering...');
 
       if (images.length === 0) {
         toast.error('Please add at least one image');
@@ -70,11 +72,13 @@ export default function NewPetPage() {
       const pet = await createPet(petData);
 
       // Upload images in the correct order
+      setButtonText('Uploading images...');
       await uploadPetImages(pet.id, orderedImages.length > 0 ? orderedImages : images);
 
       toast.success('Pet registered successfully');
       router.push('/user/pets');
     } catch (error) {
+      setButtonText('Register Pet');
       toast.error('Failed to register pet');
       console.error('Error registering pet:', error);
     } finally {
@@ -109,10 +113,10 @@ export default function NewPetPage() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Registering...
+                {buttonText}
               </>
             ) : (
-              'Register Pet'
+              buttonText
             )}
           </Button>
         </form>

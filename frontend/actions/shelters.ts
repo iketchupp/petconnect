@@ -2,7 +2,7 @@ import { CreateShelterData, Shelter, SheltersResponse } from '@/types/api';
 import { PetsResponse } from '@/types/api/pet';
 import { User } from '@/types/api/user';
 import { http } from '@/lib/http';
-import { ShelterFilters } from '@/components/app/shelters/shelter-filters/types';
+import { ShelterFilters } from '@/components/shelters/shelter-filters/types';
 
 export async function getShelters(
   cursor?: string,

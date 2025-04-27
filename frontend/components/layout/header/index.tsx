@@ -1,5 +1,4 @@
-import { MessageNotifications } from '@/components/app/user/messages/notifications';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { MessageNotifications } from '@/components/user/messages/notifications';
 
 import { HeaderBackground } from './background';
 import { MainNav } from './main-nav';

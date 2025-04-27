@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMessageStore } from '@/stores/message-store';
@@ -14,11 +14,11 @@ import {
   getUnreadMessagesCount,
 } from '@/actions/message';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ChatWindow } from '@/components/app/user/messages/chat/chat-window';
-import { ConversationsList } from '@/components/app/user/messages/conversations/conversations-list';
 import { Loading } from '@/components/loading';
+import { ChatWindow } from '@/components/user/messages/chat/chat-window';
+import { ConversationsList } from '@/components/user/messages/conversations/conversations-list';
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
@@ -188,5 +188,13 @@ export default function MessagesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <MessagesPageContent />
+    </Suspense>
   );
 }

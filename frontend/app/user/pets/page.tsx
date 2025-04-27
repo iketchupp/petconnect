@@ -21,8 +21,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { PetManageCard } from '@/components/app/pets/manage/pet-manage-card';
 import { Loading } from '@/components/loading';
+import { PetManageCard } from '@/components/pets/manage/pet-manage-card';
 
 export default function UserPetsPage() {
   const router = useRouter();

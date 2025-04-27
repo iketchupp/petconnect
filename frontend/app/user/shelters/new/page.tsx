@@ -10,11 +10,11 @@ import { toast } from 'sonner';
 import { createShelter, uploadShelterAvatar } from '@/actions/shelters';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { ShelterAddress } from '@/components/app/shelters/manage/new/shelter-address';
-import { ShelterAvatarUpload } from '@/components/app/shelters/manage/new/shelter-avatar-upload';
-import { ShelterBasicInfo } from '@/components/app/shelters/manage/new/shelter-basic-info';
-import { ShelterContactDetails } from '@/components/app/shelters/manage/new/shelter-contact-details';
-import { shelterFormSchema, ShelterFormValues } from '@/components/app/shelters/manage/new/types';
+import { ShelterAddress } from '@/components/shelters/manage/new/shelter-address';
+import { ShelterAvatarUpload } from '@/components/shelters/manage/new/shelter-avatar-upload';
+import { ShelterBasicInfo } from '@/components/shelters/manage/new/shelter-basic-info';
+import { ShelterContactDetails } from '@/components/shelters/manage/new/shelter-contact-details';
+import { shelterFormSchema, ShelterFormValues } from '@/components/shelters/manage/new/types';
 
 export default function NewShelterPage() {
   const router = useRouter();

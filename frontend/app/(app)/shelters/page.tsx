@@ -8,10 +8,10 @@ import { useInView } from 'react-intersection-observer';
 import { getShelters } from '@/actions/shelters';
 import { SheltersResponse } from '@/types/api';
 import { Button } from '@/components/ui/button';
-import { ShelterCard } from '@/components/app/shelters/shelter-card';
-import { ShelterFiltersComponent } from '@/components/app/shelters/shelter-filters';
-import { ShelterFilters } from '@/components/app/shelters/shelter-filters/types';
 import { Loading } from '@/components/loading';
+import { ShelterCard } from '@/components/shelters/shelter-card';
+import { ShelterFiltersComponent } from '@/components/shelters/shelter-filters';
+import { ShelterFilters } from '@/components/shelters/shelter-filters/types';
 
 export default function SheltersPage() {
   const { ref, inView } = useInView();
