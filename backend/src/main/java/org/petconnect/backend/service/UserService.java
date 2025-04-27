@@ -10,6 +10,7 @@ import org.petconnect.backend.dto.shelter.ShelterDTO;
 import org.petconnect.backend.dto.shelter.SheltersResponse;
 import org.petconnect.backend.dto.user.UpdateUserRequest;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.exception.ResourceNotFoundException;
 import org.petconnect.backend.model.AvatarImage;
 import org.petconnect.backend.model.Image;
 import org.petconnect.backend.model.Pet;
@@ -46,21 +47,21 @@ public class UserService {
         } catch (IllegalArgumentException e) {
             // If it's not a valid UUID, assume it's an email
             User user = userRepository.findByEmail(identifier)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + identifier));
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "email", identifier));
             return UserDTO.fromEntity(user);
         }
     }
 
     public UserDTO getUserById(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         return UserDTO.fromEntity(user);
     }
 
     @Transactional
     public UserDTO updateUser(String email, UpdateUserRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         // Validate unique constraints if email or username is being updated
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
@@ -92,7 +93,7 @@ public class UserService {
     @Transactional
     public UserDTO updateAvatar(String email, MultipartFile file) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         // Upload the new avatar image first
         FileResponse response = imageService.uploadImage(file,
@@ -137,7 +138,7 @@ public class UserService {
     @Transactional
     public void removeAvatar(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
         UUID avatarId = user.getAvatarImageId();
         if (avatarId == null) {
@@ -146,7 +147,7 @@ public class UserService {
 
         // Get the avatar image record
         AvatarImage avatar = avatarImageRepository.findById(avatarId)
-                .orElseThrow(() -> new IllegalStateException("Avatar image not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Avatar", "id", avatarId));
 
         // Update user to remove avatar reference
         user.setAvatarImageId(null);

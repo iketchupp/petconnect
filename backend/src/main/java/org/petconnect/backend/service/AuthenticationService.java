@@ -1,15 +1,17 @@
 package org.petconnect.backend.service;
 
-import lombok.RequiredArgsConstructor;
 import org.petconnect.backend.dto.auth.AuthResponse;
 import org.petconnect.backend.dto.auth.LoginRequest;
 import org.petconnect.backend.dto.auth.RegisterRequest;
+import org.petconnect.backend.exception.ResourceNotFoundException;
 import org.petconnect.backend.model.User;
 import org.petconnect.backend.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +40,11 @@ public class AuthenticationService {
         userRepository.save(user);
 
         var jwtToken = jwtService.generateToken(
-            org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPasswordHash())
-                .roles("USER")
-                .build()
-        );
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPasswordHash())
+                        .roles("USER")
+                        .build());
 
         return AuthResponse.builder()
                 .token(jwtToken)
@@ -54,23 +55,20 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                        request.getPassword()));
 
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", request.getEmail()));
 
         var jwtToken = jwtService.generateToken(
-            org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPasswordHash())
-                .roles("USER")
-                .build()
-        );
+                org.springframework.security.core.userdetails.User.builder()
+                        .username(user.getEmail())
+                        .password(user.getPasswordHash())
+                        .roles("USER")
+                        .build());
 
         return AuthResponse.builder()
                 .token(jwtToken)
                 .build();
     }
-} 
+}

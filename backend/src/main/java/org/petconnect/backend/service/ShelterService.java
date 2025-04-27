@@ -13,6 +13,7 @@ import org.petconnect.backend.dto.shelter.ShelterDTO;
 import org.petconnect.backend.dto.shelter.ShelterFilters;
 import org.petconnect.backend.dto.shelter.SheltersResponse;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.exception.ResourceNotFoundException;
 import org.petconnect.backend.model.Address;
 import org.petconnect.backend.model.AvatarImage;
 import org.petconnect.backend.model.Image;
@@ -111,7 +112,7 @@ public class ShelterService {
 
     public ShelterDTO getShelterById(UUID id) {
         Shelter shelter = shelterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", id));
         return ShelterDTO.fromEntity(shelter);
     }
 
@@ -140,7 +141,7 @@ public class ShelterService {
 
         // Verify shelter exists
         shelterRepository.findById(shelterId)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", shelterId));
 
         // Get total count of pets for this shelter
         long totalCount = petRepository.countByShelterIdAndStatusAvailable(shelterId);
@@ -231,7 +232,7 @@ public class ShelterService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         Shelter shelter = shelterRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", id));
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
@@ -295,7 +296,7 @@ public class ShelterService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         Shelter shelter = shelterRepository.findById(shelterId)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", shelterId));
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
@@ -304,8 +305,9 @@ public class ShelterService {
 
         // Delete old avatar if it exists
         if (shelter.getAvatarImageId() != null) {
-            AvatarImage oldAvatar = avatarImageRepository.findById(shelter.getAvatarImageId())
-                    .orElseThrow(() -> new IllegalArgumentException("Avatar image not found"));
+            final UUID avatarId = shelter.getAvatarImageId();
+            AvatarImage oldAvatar = avatarImageRepository.findById(avatarId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Avatar", "id", avatarId));
             imageService.deleteImage(oldAvatar.getImage().getKey());
             avatarImageRepository.delete(oldAvatar);
         }
@@ -324,15 +326,15 @@ public class ShelterService {
 
         // Update shelter with new avatar
         shelter.setAvatarImageId(avatar.getId());
-        shelter = shelterRepository.save(shelter);
+        Shelter updatedShelter = shelterRepository.save(shelter);
 
-        return ShelterDTO.fromEntity(shelter);
+        return ShelterDTO.fromEntity(updatedShelter);
     }
 
     public UserDTO getShelterOwner(UUID shelterId) {
         // Find the shelter by ID
         Shelter shelter = shelterRepository.findById(shelterId)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", shelterId));
 
         // Get the owner ID from the shelter
         UUID ownerId = shelter.getOwnerId();
@@ -347,7 +349,7 @@ public class ShelterService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         Shelter shelter = shelterRepository.findById(shelterId)
-                .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", shelterId));
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
@@ -375,8 +377,9 @@ public class ShelterService {
 
         // Delete shelter's avatar if exists
         if (shelter.getAvatarImageId() != null) {
-            AvatarImage avatar = avatarImageRepository.findById(shelter.getAvatarImageId())
-                    .orElseThrow(() -> new IllegalArgumentException("Avatar image not found"));
+            final UUID avatarId = shelter.getAvatarImageId();
+            AvatarImage avatar = avatarImageRepository.findById(avatarId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Avatar", "id", avatarId));
             imageService.deleteImage(avatar.getImage().getKey());
             avatarImageRepository.delete(avatar);
         }

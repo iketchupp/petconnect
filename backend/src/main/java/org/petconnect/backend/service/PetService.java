@@ -16,6 +16,7 @@ import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.pet.PetFilters;
 import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.exception.ResourceNotFoundException;
 import org.petconnect.backend.model.Address;
 import org.petconnect.backend.model.Image;
 import org.petconnect.backend.model.Pet;
@@ -57,7 +58,7 @@ public class PetService {
 
     public PetDTO getPetById(UUID id) {
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", id));
         return PetDTO.fromEntity(pet);
     }
 
@@ -164,7 +165,7 @@ public class PetService {
         // If shelterId is provided, verify user is a member or owner of the shelter
         if (request.getShelterId() != null) {
             Shelter shelter = shelterRepository.findById(request.getShelterId())
-                    .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", request.getShelterId()));
 
             boolean isOwner = shelter.getOwnerId().equals(currentUser.getId());
 
@@ -237,7 +238,7 @@ public class PetService {
     public PetDTO uploadPetImages(UUID petId, List<MultipartFile> files) {
         // Get the pet and verify it exists
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // Verify the current user has permission to modify this pet
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -286,7 +287,7 @@ public class PetService {
 
     public UserDTO getPetOwner(UUID petId) {
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // If the pet belongs to a shelter, return the shelter owner
         if (pet.getShelterId() != null) {
@@ -303,7 +304,7 @@ public class PetService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // Verify user has permission to delete the pet
         boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
@@ -331,12 +332,12 @@ public class PetService {
 
     public AddressDTO getPetAddress(UUID petId) {
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // If pet is registered with a shelter, return shelter's address
         if (pet.getShelterId() != null) {
             Shelter shelter = shelterRepository.findById(pet.getShelterId())
-                    .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", pet.getShelterId()));
             return shelter.getAddress() != null ? AddressDTO.fromEntity(shelter.getAddress()) : null;
         }
 
@@ -360,12 +361,12 @@ public class PetService {
 
     public AddressDTO getFullPetAddress(UUID petId) {
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // If pet is registered with a shelter, return shelter's address
         if (pet.getShelterId() != null) {
             Shelter shelter = shelterRepository.findById(pet.getShelterId())
-                    .orElseThrow(() -> new IllegalArgumentException("Shelter not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Shelter", "id", pet.getShelterId()));
             return shelter.getAddress() != null ? AddressDTO.fromEntity(shelter.getAddress()) : null;
         }
 
@@ -384,7 +385,7 @@ public class PetService {
         UserDTO currentUser = userService.getUser(userEmail);
 
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // Verify user has permission to update the status
         boolean isAuthorized = pet.getCreatedByUserId().equals(currentUser.getId()) ||
@@ -415,7 +416,7 @@ public class PetService {
     @Transactional
     public PetDTO markPetAsAdopted(UUID petId, UUID userId) {
         Pet pet = petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
         // Check if the pet has PENDING status
         if (pet.getStatus() != PetStatus.PENDING) {
