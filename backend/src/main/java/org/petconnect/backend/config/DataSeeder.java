@@ -2,7 +2,6 @@ package org.petconnect.backend.config;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.petconnect.backend.repository.ShelterRepository;
 import org.petconnect.backend.repository.UserRepository;
 import org.petconnect.backend.service.ImageService;
 import org.petconnect.backend.service.StorageService;
+import org.petconnect.backend.util.DateTimeUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
@@ -91,90 +91,6 @@ public class DataSeeder implements CommandLineRunner {
         entityManager.createNativeQuery("CREATE EXTENSION IF NOT EXISTS earthdistance").executeUpdate();
     }
 
-    @Transactional
-    public void clearDatabase() {
-        // First break all relationships using native queries
-        entityManager
-                .createNativeQuery("UPDATE \"user\" SET avatar_image_id = NULL")
-                .executeUpdate();
-
-        entityManager
-                .createNativeQuery("UPDATE \"shelter\" SET avatar_image_id = NULL")
-                .executeUpdate();
-
-        // Delete all favorites first
-        entityManager
-                .createNativeQuery("DELETE FROM \"favorite\"")
-                .executeUpdate();
-
-        // Delete all messages
-        entityManager
-                .createNativeQuery("DELETE FROM \"message\"")
-                .executeUpdate();
-
-        // Delete all shelter members
-        entityManager
-                .createNativeQuery("DELETE FROM \"shelter_member\"")
-                .executeUpdate();
-
-        // Delete all pet images first
-        entityManager
-                .createNativeQuery("DELETE FROM \"pet_image\"")
-                .executeUpdate();
-
-        // Delete all pet addresses and shelter addresses
-        entityManager
-                .createNativeQuery("DELETE FROM \"pet_address\"")
-                .executeUpdate();
-
-        entityManager
-                .createNativeQuery("DELETE FROM \"shelter_address\"")
-                .executeUpdate();
-
-        // Delete all addresses
-        entityManager
-                .createNativeQuery("DELETE FROM \"address\"")
-                .executeUpdate();
-
-        // Delete all pets
-        entityManager
-                .createNativeQuery("DELETE FROM \"pet\"")
-                .executeUpdate();
-
-        // Delete shelters and users
-        entityManager
-                .createNativeQuery("DELETE FROM \"shelter\"")
-                .executeUpdate();
-
-        entityManager
-                .createNativeQuery("DELETE FROM \"user\"")
-                .executeUpdate();
-
-        // Delete avatar images
-        entityManager
-                .createNativeQuery("DELETE FROM \"avatar_image\"")
-                .executeUpdate();
-
-        // Get all images before deletion to clean S3
-        List<Image> allImages = imageRepository.findAll();
-
-        // Delete all images from database
-        entityManager
-                .createNativeQuery("DELETE FROM \"image\"")
-                .executeUpdate();
-
-        // Finally clean up S3 storage
-        for (Image image : allImages) {
-            try {
-                imageService.deleteImage(image.getKey());
-            } catch (Exception e) {
-                // Log but continue with deletion even if S3 deletion fails
-                System.err.println("Failed to delete S3 image: " + image.getKey() + " - "
-                        + e.getMessage());
-            }
-        }
-    }
-
     private Image uploadSampleImage(String resourcePath, String s3Folder) {
         try {
             var resource = new ClassPathResource(resourcePath);
@@ -216,6 +132,8 @@ public class DataSeeder implements CommandLineRunner {
             e.printStackTrace();
         }
 
+        System.out.println("Seeding data...");
+
         // Only seed if the database is empty
         if (userRepository.count() > 0) {
             return;
@@ -228,7 +146,7 @@ public class DataSeeder implements CommandLineRunner {
                 .username("johndoe")
                 .email("johndoe@example.com")
                 .passwordHash(passwordEncoder.encode("Johndoe12"))
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateTimeUtil.nowUTC())
                 .build();
         johnDoe = userRepository.save(johnDoe);
 
@@ -249,7 +167,7 @@ public class DataSeeder implements CommandLineRunner {
                 .email("contact@happypaws.com")
                 .website("www.happypaws.com")
                 .ownerId(johnDoe.getId())
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateTimeUtil.nowUTC())
                 .build();
         shelter1 = shelterRepository.save(shelter1);
 
@@ -262,7 +180,7 @@ public class DataSeeder implements CommandLineRunner {
                 .country("United States")
                 .lat(40.7128)
                 .lng(-74.0060)
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateTimeUtil.nowUTC())
                 .build();
         address1.setFormattedAddress("123 Main St, New York, NY 10001");
         address1 = addressRepository.save(address1);
@@ -284,7 +202,7 @@ public class DataSeeder implements CommandLineRunner {
                 .email("contact@furryfriends.com")
                 .website("www.furryfriends.com")
                 .ownerId(johnDoe.getId())
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateTimeUtil.nowUTC())
                 .build();
         shelter2 = shelterRepository.save(shelter2);
 
@@ -297,7 +215,7 @@ public class DataSeeder implements CommandLineRunner {
                 .country("United States")
                 .lat(34.0522)
                 .lng(-118.2437)
-                .createdAt(LocalDateTime.now())
+                .createdAt(DateTimeUtil.nowUTC())
                 .build();
         address2.setFormattedAddress("456 Park Ave, Los Angeles, CA 90001");
         address2 = addressRepository.save(address2);
@@ -340,7 +258,7 @@ public class DataSeeder implements CommandLineRunner {
                     .username(username)
                     .email(username + "@" + faker.internet().domainName())
                     .passwordHash(passwordEncoder.encode("password123"))
-                    .createdAt(LocalDateTime.now().minusDays(random.nextInt(365)))
+                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
                     .build();
             user = userRepository.save(user);
 
@@ -375,7 +293,7 @@ public class DataSeeder implements CommandLineRunner {
                     .website("www." + shelterName.toLowerCase().replaceAll("[^a-z0-9]", "")
                             + ".com")
                     .ownerId(owner.getId())
-                    .createdAt(LocalDateTime.now().minusDays(random.nextInt(365)))
+                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
                     .build();
             shelter = shelterRepository.save(shelter);
 
@@ -401,7 +319,7 @@ public class DataSeeder implements CommandLineRunner {
                     .country("United States")
                     .lat(faker.number().randomDouble(6, 25, 49))
                     .lng(faker.number().randomDouble(6, -125, -65))
-                    .createdAt(LocalDateTime.now().minusDays(random.nextInt(365)))
+                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
                     .build();
             address.setFormattedAddress(String.format("%s, %s, %s %s",
                     address.getAddress1(), address.getCity(), address.getRegion(),
@@ -445,7 +363,7 @@ public class DataSeeder implements CommandLineRunner {
                 .status(PetStatus.AVAILABLE)
                 .createdByUserId(creatorId)
                 .shelterId(shelterId)
-                .createdAt(LocalDateTime.now().minusDays(random.nextInt(365)))
+                .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
                 .build();
         pet = petRepository.save(pet);
 
@@ -459,7 +377,7 @@ public class DataSeeder implements CommandLineRunner {
                     .country("United States")
                     .lat(faker.number().randomDouble(6, 25, 49))
                     .lng(faker.number().randomDouble(6, -125, -65))
-                    .createdAt(LocalDateTime.now().minusDays(random.nextInt(365)))
+                    .createdAt(DateTimeUtil.nowUTC().minusDays(random.nextInt(365)))
                     .build();
             address.setFormattedAddress(String.format("%s, %s, %s %s",
                     address.getAddress1(), address.getCity(), address.getRegion(),
@@ -491,7 +409,7 @@ public class DataSeeder implements CommandLineRunner {
                     .petId(pet.getId())
                     .imageId(petImage.getId())
                     .isPrimary(setPrimary)
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(DateTimeUtil.nowUTC())
                     .build();
             petImages.add(petImageEntity);
             setPrimary = false;

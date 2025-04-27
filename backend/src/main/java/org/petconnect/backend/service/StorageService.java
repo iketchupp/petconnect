@@ -68,7 +68,6 @@ public class StorageService {
                             .contentType(file.getContentType())
                             .build());
 
-            log.info("File '{}' uploaded successfully with object name '{}'", file.getOriginalFilename(), objectName);
             return objectName;
         } catch (Exception e) {
             log.error("Error uploading file: {}", e.getMessage());
@@ -84,7 +83,6 @@ public class StorageService {
                             .bucket(getBucketName())
                             .object(objectName)
                             .build());
-            log.info("File '{}' deleted successfully", objectName);
         } catch (Exception e) {
             log.error("Error deleting file: {}", e.getMessage());
             throw new RuntimeException("Error deleting file from MinIO", e);

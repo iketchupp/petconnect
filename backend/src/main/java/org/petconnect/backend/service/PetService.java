@@ -1,6 +1,6 @@
 package org.petconnect.backend.service;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -30,6 +30,7 @@ import org.petconnect.backend.repository.PetAddressRepository;
 import org.petconnect.backend.repository.PetImageRepository;
 import org.petconnect.backend.repository.PetRepository;
 import org.petconnect.backend.repository.ShelterRepository;
+import org.petconnect.backend.util.DateTimeUtil;
 import org.petconnect.backend.util.PaginationUtil;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -77,10 +78,10 @@ public class PetService {
         limit = PaginationUtil.processLimit(limit);
 
         // Convert age range to dates
-        LocalDateTime minDate = null;
-        LocalDateTime maxDate = null;
+        ZonedDateTime minDate = null;
+        ZonedDateTime maxDate = null;
         if (filters.getAgeRange() != null) {
-            LocalDateTime now = LocalDateTime.now();
+            ZonedDateTime now = DateTimeUtil.nowUTC();
             if (filters.getAgeRange().getMin() != null) {
                 // For minimum age, we need the latest possible birth date
                 minDate = now.minusMonths(filters.getAgeRange().getMin());

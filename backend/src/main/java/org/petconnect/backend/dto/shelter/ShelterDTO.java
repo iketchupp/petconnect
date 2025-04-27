@@ -1,16 +1,16 @@
 package org.petconnect.backend.dto.shelter;
 
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
+import org.petconnect.backend.dto.address.AddressDTO;
+import org.petconnect.backend.model.Shelter;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import org.petconnect.backend.dto.address.AddressDTO;
-import org.petconnect.backend.model.Shelter;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @Builder
@@ -46,7 +46,7 @@ public class ShelterDTO {
     private AddressDTO address;
 
     @Schema(description = "When the shelter was created")
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     public static ShelterDTO fromEntity(Shelter shelter) {
         return ShelterDTO.builder()

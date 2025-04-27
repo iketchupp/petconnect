@@ -1,11 +1,11 @@
 package org.petconnect.backend.config;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
 import org.petconnect.backend.config.helper.YamlConfig;
 import org.petconnect.backend.dto.error.ErrorResponse;
+import org.petconnect.backend.util.DateTimeUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -50,7 +50,7 @@ public class SecurityConfig {
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
                             ErrorResponse errorResponse = ErrorResponse.builder()
-                                    .timestamp(LocalDateTime.now())
+                                    .timestamp(DateTimeUtil.nowUTC())
                                     .status(401)
                                     .error("Unauthorized")
                                     .message("Authentication required")

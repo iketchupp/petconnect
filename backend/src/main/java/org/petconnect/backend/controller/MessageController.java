@@ -50,11 +50,6 @@ public class MessageController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDTO currentUser = getUserFromAuthentication(authentication);
 
-        // Validate that pet ID is provided
-        if (request.getPetId() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
         MessageDTO sentMessage = messageService.sendMessage(currentUser.getId(), request);
         return ResponseEntity.ok(sentMessage);
     }
@@ -106,7 +101,7 @@ public class MessageController {
 
     @Operation(summary = "Mark conversation about pet as read", description = "Mark all messages from a user about a specific pet as read")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Messages marked as read"),
+            @ApiResponse(responseCode = "204", description = "Messages marked as read"),
             @ApiResponse(responseCode = "401", description = "Not authenticated")
     })
     @PutMapping("/conversations/{userId}/pets/{petId}/read")
@@ -117,7 +112,7 @@ public class MessageController {
         UserDTO currentUser = getUserFromAuthentication(authentication);
 
         messageService.markMessagesAboutPetAsRead(currentUser.getId(), userId, petId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get unread messages count", description = "Get the count of unread messages for the current user")

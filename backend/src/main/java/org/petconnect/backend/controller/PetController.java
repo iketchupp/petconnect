@@ -11,6 +11,7 @@ import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.model.PetStatus;
 import org.petconnect.backend.service.PetService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -128,14 +129,14 @@ public class PetController {
 
     @Operation(summary = "Create a new pet", description = "Creates a new pet listing")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully created pet"),
+            @ApiResponse(responseCode = "201", description = "Successfully created pet"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "401", description = "Not authenticated")
     })
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<PetDTO> createPet(@Valid @RequestBody CreatePetRequest request) {
-        return ResponseEntity.ok(petService.createPet(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(petService.createPet(request));
     }
 
     @Operation(summary = "Upload pet images", description = "Upload one or more images for a pet. The first image will be set as primary if no primary image exists.")

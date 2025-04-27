@@ -43,35 +43,39 @@ public class FavoriteController {
     @PostMapping("/{petId}")
     @Operation(summary = "Add a pet to favorites", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet favorited successfully"),
+            @ApiResponse(responseCode = "204", description = "Pet favorited successfully"),
             @ApiResponse(responseCode = "400", description = "Pet is already favorited"),
-            @ApiResponse(responseCode = "404", description = "Pet not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
     })
-    public ResponseEntity<Void> addFavorite(@PathVariable UUID petId) {
+    public ResponseEntity<Void> addFavorite(
+            @Parameter(description = "ID of the pet to favorite", required = true) @PathVariable UUID petId) {
         favoriteService.addFavorite(petId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{petId}")
     @Operation(summary = "Remove a pet from favorites", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Pet removed from favorites successfully"),
+            @ApiResponse(responseCode = "204", description = "Pet removed from favorites successfully"),
             @ApiResponse(responseCode = "400", description = "Pet is not favorited"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    public ResponseEntity<Void> removeFavorite(@PathVariable UUID petId) {
+    public ResponseEntity<Void> removeFavorite(
+            @Parameter(description = "ID of the pet to remove from favorites", required = true) @PathVariable UUID petId) {
         favoriteService.removeFavorite(petId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{petId}")
     @Operation(summary = "Check if a pet is favorited", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Favorite status retrieved successfully"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Pet not found")
     })
-    public ResponseEntity<Boolean> isPetFavorited(@PathVariable UUID petId) {
+    public ResponseEntity<Boolean> isPetFavorited(
+            @Parameter(description = "ID of the pet to check favorite status", required = true) @PathVariable UUID petId) {
         return ResponseEntity.ok(favoriteService.isPetFavorited(petId));
     }
 }

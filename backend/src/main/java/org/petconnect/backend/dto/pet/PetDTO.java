@@ -1,7 +1,7 @@
 package org.petconnect.backend.dto.pet;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -53,7 +53,7 @@ public class PetDTO {
     private String shelterName;
 
     @Schema(description = "When the pet was added to the system")
-    private LocalDateTime createdAt;
+    private ZonedDateTime createdAt;
 
     @Schema(description = "List of URLs to the pet's images")
     private List<String> imageUrls;

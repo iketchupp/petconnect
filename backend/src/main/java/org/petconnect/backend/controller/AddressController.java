@@ -26,11 +26,15 @@ public class AddressController {
 
     @Operation(summary = "Get cities by country", description = "Retrieves all distinct cities for a specific country")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved cities")
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved cities"),
+            @ApiResponse(responseCode = "400", description = "Country parameter is missing")
     })
     @GetMapping("/cities")
     public ResponseEntity<List<String>> getCitiesByCountry(
             @Parameter(description = "Country to get cities for", required = true) @RequestParam String country) {
+        if (country == null || country.trim().isEmpty()) {
+            throw new IllegalArgumentException("Country parameter is missing or empty");
+        }
         return ResponseEntity.ok(addressService.getCitiesByCountry(country));
     }
 

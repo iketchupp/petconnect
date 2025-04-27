@@ -1,6 +1,6 @@
 package org.petconnect.backend.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -52,7 +52,7 @@ public class Image {
 
     @CreationTimestamp
     @Column(name = "uploaded_at", nullable = false, updatable = false)
-    private LocalDateTime uploadedAt;
+    private ZonedDateTime uploadedAt;
 
     // Relationships
     @OneToOne(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)

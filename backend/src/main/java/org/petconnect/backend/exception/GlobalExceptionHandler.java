@@ -1,10 +1,10 @@
 package org.petconnect.backend.exception;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.petconnect.backend.dto.error.ErrorResponse;
+import org.petconnect.backend.util.DateTimeUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
         });
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Error")
                 .message("Invalid request parameters")
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex,
             HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Validation Error")
                 .message(ex.getMessage())
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ BadCredentialsException.class, AuthenticationException.class })
     public ResponseEntity<ErrorResponse> handleAuthenticationException(Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("Unauthorized")
                 .message(
@@ -75,10 +75,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex,
+            HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .timestamp(DateTimeUtil.nowUTC())
+                .status(HttpStatus.NOT_FOUND.value())
+                .error("Not Found")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ErrorResponse> handleMultipartException(MultipartException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("File Upload Error")
                 .message(ex.getMessage())
@@ -91,7 +105,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ErrorResponse> handleExpiredJwtException(ExpiredJwtException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.UNAUTHORIZED.value())
                 .error("Unauthorized")
                 .message("JWT token has expired")
@@ -105,7 +119,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException ex,
             HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.NOT_FOUND.value())
                 .error("Not Found")
                 .message("The requested resource was not found")
@@ -122,7 +136,7 @@ public class GlobalExceptionHandler {
                 ex.getValue(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "Unknown");
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Type Mismatch")
                 .message(message)
@@ -137,7 +151,7 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException ex,
             HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error("Missing Parameter")
                 .message(String.format("Required parameter '%s' of type '%s' is missing",
@@ -151,7 +165,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error("Internal Server Error")
                 .message("An unexpected error occurred")

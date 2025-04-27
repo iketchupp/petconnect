@@ -1,10 +1,10 @@
 package org.petconnect.backend.config;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import org.petconnect.backend.dto.error.ErrorResponse;
 import org.petconnect.backend.service.JwtService;
+import org.petconnect.backend.util.DateTimeUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
@@ -123,7 +123,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateTimeUtil.nowUTC())
                 .status(status.value())
                 .error(error)
                 .message(message)

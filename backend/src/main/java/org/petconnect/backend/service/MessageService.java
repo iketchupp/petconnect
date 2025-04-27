@@ -68,8 +68,6 @@ public class MessageService {
         // Convert to DTO
         MessageDTO messageDTO = MessageDTO.fromEntity(message);
 
-        System.out.println("Message timestamp (UTC): " + messageDTO.getSentAt());
-
         // Send the message via WebSocket
         WebSocketMessage wsMessage = WebSocketMessage.builder()
                 .type(WebSocketMessage.MessageType.NEW_MESSAGE)

@@ -1,25 +1,25 @@
 package org.petconnect.backend.dto.error;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
-    private LocalDateTime timestamp;
+    private ZonedDateTime timestamp;
     private int status;
     private String error;
     private String message;
     private String path;
-    
+
     @Builder.Default
     private List<ValidationError> validationErrors = new ArrayList<>();
 
@@ -31,4 +31,4 @@ public class ErrorResponse {
         private String field;
         private String message;
     }
-} 
+}

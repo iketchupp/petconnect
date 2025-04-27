@@ -1,6 +1,6 @@
 package org.petconnect.backend.repository;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,8 +98,8 @@ public interface PetRepository extends JpaRepository<Pet, UUID> {
             @Param("species") String species,
             @Param("breed") String breed,
             @Param("gender") String gender,
-            @Param("minDate") LocalDateTime minDate,
-            @Param("maxDate") LocalDateTime maxDate,
+            @Param("minDate") ZonedDateTime minDate,
+            @Param("maxDate") ZonedDateTime maxDate,
             @Param("searchQuery") String searchQuery,
             @Param("sortBy") String sortBy,
             @Param("lat") Double lat,
@@ -180,8 +180,8 @@ public interface PetRepository extends JpaRepository<Pet, UUID> {
             @Param("species") String species,
             @Param("breed") String breed,
             @Param("gender") String gender,
-            @Param("minDate") LocalDateTime minDate,
-            @Param("maxDate") LocalDateTime maxDate,
+            @Param("minDate") ZonedDateTime minDate,
+            @Param("maxDate") ZonedDateTime maxDate,
             @Param("searchQuery") String searchQuery,
             @Param("city") String city,
             @Param("country") String country);

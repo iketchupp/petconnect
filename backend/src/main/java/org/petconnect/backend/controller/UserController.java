@@ -45,7 +45,6 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Authentication: " + authentication);
         return ResponseEntity.ok(userService.getUser(authentication.getName()));
     }
 
@@ -69,7 +68,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Not authenticated")
     })
     @PostMapping(value = "/avatar", consumes = "multipart/form-data")
-    public ResponseEntity<?> uploadAvatar(
+    public ResponseEntity<UserDTO> uploadAvatar(
             @Parameter(description = "Avatar image file to upload", required = true) @RequestParam("file") MultipartFile file) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return ResponseEntity.ok(userService.updateAvatar(authentication.getName(), file));
@@ -77,7 +76,7 @@ public class UserController {
 
     @Operation(summary = "Remove avatar", description = "Remove the current user's avatar image")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully removed avatar"),
+            @ApiResponse(responseCode = "204", description = "Successfully removed avatar"),
             @ApiResponse(responseCode = "400", description = "User has no avatar to remove"),
             @ApiResponse(responseCode = "401", description = "Not authenticated"),
             @ApiResponse(responseCode = "404", description = "User not found")
@@ -86,7 +85,7 @@ public class UserController {
     public ResponseEntity<Void> removeAvatar() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         userService.removeAvatar(authentication.getName());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Get current user's pets", description = "Retrieves a paginated list of pets belonging to the currently authenticated user")

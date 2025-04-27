@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.petconnect.backend.dto.favorite.FavoritesResponse;
 import org.petconnect.backend.dto.pet.PetDTO;
 import org.petconnect.backend.dto.user.UserDTO;
+import org.petconnect.backend.exception.ResourceNotFoundException;
 import org.petconnect.backend.model.Favorite;
 import org.petconnect.backend.repository.FavoriteRepository;
 import org.petconnect.backend.repository.PetRepository;
@@ -26,9 +27,14 @@ public class FavoriteService {
     private final UserService userService;
 
     @SuppressWarnings("UseSpecificCatch")
-    public FavoritesResponse getFavoritePets(String cursor, int limit) {
+    public FavoritesResponse getFavoritePets(String cursor, Integer limit) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserDTO currentUser = userService.getUser(userEmail);
+
+        // Default limit if not provided
+        if (limit == null) {
+            limit = 12;
+        }
 
         // Calculate offset from cursor if provided
         int offset = 0;
@@ -83,14 +89,17 @@ public class FavoriteService {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserDTO currentUser = userService.getUser(userEmail);
 
+        // Check if pet exists
         petRepository.findById(petId)
-                .orElseThrow(() -> new IllegalArgumentException("Pet not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pet", "id", petId));
 
+        // Check if already favorited
         Favorite.FavoriteId favoriteId = new Favorite.FavoriteId(currentUser.getId(), petId);
         if (favoriteRepository.existsById(favoriteId)) {
             throw new IllegalArgumentException("Pet is already favorited");
         }
 
+        // Create new favorite
         Favorite favorite = Favorite.builder()
                 .userId(currentUser.getId())
                 .petId(petId)
@@ -115,6 +124,12 @@ public class FavoriteService {
     public boolean isPetFavorited(UUID petId) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserDTO currentUser = userService.getUser(userEmail);
+
+        // Check if pet exists
+        if (!petRepository.existsById(petId)) {
+            throw new ResourceNotFoundException("Pet", "id", petId);
+        }
+
         Favorite.FavoriteId favoriteId = new Favorite.FavoriteId(currentUser.getId(), petId);
         return favoriteRepository.existsById(favoriteId);
     }

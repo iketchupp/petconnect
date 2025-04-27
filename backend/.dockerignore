@@ -1,0 +1,11 @@
+target/
+!target/*.jar
+.git/
+.github/
+.gitignore
+.vscode/
+.idea/
+*.md
+*.log
+.DS_Store 
+src/main/resources/config.yml

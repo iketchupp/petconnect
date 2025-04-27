@@ -76,7 +76,6 @@ public class ImageService {
             // Then delete from database if exists
             imageRepository.findByKey(key).ifPresent(image -> {
                 imageRepository.delete(image);
-                log.info("Image record deleted from database for key: {}", key);
             });
         } catch (Exception e) {
             log.error("Error deleting image with key {}: {}", key, e.getMessage());
