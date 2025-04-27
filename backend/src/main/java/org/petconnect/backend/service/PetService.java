@@ -17,6 +17,7 @@ import org.petconnect.backend.dto.pet.PetFilters;
 import org.petconnect.backend.dto.pet.PetsResponse;
 import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.exception.ResourceNotFoundException;
+import org.petconnect.backend.exception.UnauthorizedException;
 import org.petconnect.backend.model.Address;
 import org.petconnect.backend.model.Image;
 import org.petconnect.backend.model.Pet;
@@ -170,7 +171,7 @@ public class PetService {
             boolean isOwner = shelter.getOwnerId().equals(currentUser.getId());
 
             if (!isOwner) {
-                throw new IllegalArgumentException("User is not authorized to create pets for this shelter");
+                throw new UnauthorizedException("User is not authorized to create pets for this shelter");
             }
 
             // Shelter pets should not have an address
@@ -248,7 +249,7 @@ public class PetService {
                 (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
 
         if (!isAuthorized) {
-            throw new IllegalArgumentException("User is not authorized to modify this pet");
+            throw new UnauthorizedException("User is not authorized to modify this pet");
         }
 
         // Check if there's already a primary image
@@ -311,7 +312,7 @@ public class PetService {
                 (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
 
         if (!isAuthorized) {
-            throw new IllegalArgumentException("User is not authorized to delete this pet");
+            throw new UnauthorizedException("User is not authorized to delete this pet");
         }
 
         // Store image keys for deletion after PetImage records are removed
@@ -392,7 +393,7 @@ public class PetService {
                 (pet.getShelterId() != null && pet.getShelter().getOwnerId().equals(currentUser.getId()));
 
         if (!isAuthorized) {
-            throw new IllegalArgumentException("User is not authorized to update this pet's status");
+            throw new UnauthorizedException("User is not authorized to update this pet's status");
         }
 
         // Cannot change status if already adopted
@@ -435,7 +436,7 @@ public class PetService {
                     .anyMatch(m -> m.getSenderId().equals(userId) || m.getReceiverId().equals(userId));
 
             if (!hasMessagedAboutPet) {
-                throw new IllegalArgumentException("User is not authorized to mark this pet as adopted");
+                throw new UnauthorizedException("User is not authorized to mark this pet as adopted");
             }
         }
 

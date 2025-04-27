@@ -144,6 +144,7 @@ public class PetController {
             @ApiResponse(responseCode = "200", description = "Successfully uploaded images"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "401", description = "Not authenticated"),
+            @ApiResponse(responseCode = "403", description = "Not authorized to upload images for this pet"),
             @ApiResponse(responseCode = "404", description = "Pet not found")
     })
     @SecurityRequirement(name = "bearerAuth")
@@ -207,6 +208,7 @@ public class PetController {
     @Operation(summary = "Update pet status", description = "Updates the status of a pet. Only the pet owner or shelter members can update the status.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated pet status"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "401", description = "Not authenticated"),
             @ApiResponse(responseCode = "403", description = "Not authorized to update this pet's status"),
             @ApiResponse(responseCode = "404", description = "Pet not found")
@@ -222,6 +224,7 @@ public class PetController {
     @Operation(summary = "Mark pet as adopted", description = "Mark a pet as adopted by a user who has messaged about the pet")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Pet marked as adopted successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request, e.g., pet not in PENDING status"),
             @ApiResponse(responseCode = "401", description = "Not authenticated"),
             @ApiResponse(responseCode = "403", description = "Not authorized to mark pet as adopted"),
             @ApiResponse(responseCode = "404", description = "Pet not found")

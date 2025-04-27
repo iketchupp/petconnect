@@ -13,6 +13,7 @@ import org.petconnect.backend.dto.message.SendMessageRequest;
 import org.petconnect.backend.dto.message.WebSocketMessage;
 import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.exception.ResourceNotFoundException;
+import org.petconnect.backend.exception.UnauthorizedException;
 import org.petconnect.backend.model.Message;
 import org.petconnect.backend.model.Pet;
 import org.petconnect.backend.model.PetStatus;
@@ -162,7 +163,7 @@ public class MessageService {
                 if (!pet.getCreatedByUserId().equals(userId) &&
                                 !(pet.getShelterId() != null &&
                                                 pet.getShelter().getOwnerId().equals(userId))) {
-                        throw new IllegalArgumentException("You are not authorized to update this pet's status");
+                        throw new UnauthorizedException("You are not authorized to update this pet's status");
                 }
 
                 // Cannot change status if already adopted
@@ -189,7 +190,7 @@ public class MessageService {
                                 .anyMatch(m -> m.getSenderId().equals(userId) || m.getReceiverId().equals(userId));
 
                 if (!hasMessagedAboutPet) {
-                        throw new IllegalArgumentException("You are not authorized to mark this pet as adopted");
+                        throw new UnauthorizedException("You are not authorized to mark this pet as adopted");
                 }
 
                 pet.setStatus(PetStatus.ADOPTED);
