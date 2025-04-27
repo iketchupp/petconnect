@@ -1,0 +1,82 @@
+= Üzenet (Message) - Adatmodell
+
+== Leírás
+
+A Message (Üzenet) entitás lehetővé teszi a rendszer felhasználói közötti, illetve felhasználó és menhely közötti kommunikációt. Az entitás tárolja az üzenet szövegét, a küldő és a címzett azonosítóját, valamint opcionálisan egy menhelyhez vagy állathoz is kapcsolódhat. Továbbá nyilvántartja, hogy az üzenet olvasott állapotban van-e, illetve mikor lett elküldve.
+
+== Attribútumok
+
+[cols="1h,3", options="header"]
+|===
+| Attribútum | Leírás
+| id | UUID típusú, automatikusan generált egyedi azonosító. Elsődleges kulcs.
+| senderId | A küldő felhasználó UUID azonosítója. Kötelező mező. Külső kulcs a User entitásra, de a kapcsolat nem módosítható.
+| receiverId | A címzett felhasználó UUID azonosítója. Kötelező mező. Külső kulcs a User entitásra, de a kapcsolat nem módosítható.
+| content | Az üzenet szöveges tartalma. Kötelező mező, maximum 2000 karakter hosszú.
+| isRead | Boolean típusú mező, amely azt jelöli, hogy az üzenetet elolvasták-e. Alapértelmezett értéke: false.
+| shelterId | Opcionális mező, amely egy menhely UUID azonosítóját tartalmazza, ha az üzenet kapcsolódik egy menhelyhez.
+| petId | Opcionális mező, amely egy állat UUID azonosítóját tartalmazza, ha az üzenet kapcsolódik egy állathoz.
+| sentAt | Az üzenet elküldésének időpontja ZonedDateTime formátumban. Nem módosítható.
+|===
+
+== Kapcsolatok
+
+[cols="1,1,3"]
+|===
+| Kapcsolódó entitás | Kapcsolat típusa | Leírás
+| User (sender) | ManyToOne | A küldő felhasználóhoz kapcsolódik. A senderId alapján. A kapcsolat csak olvasható (insertable=false, updatable=false).
+| User (receiver) | ManyToOne | A címzett felhasználóhoz kapcsolódik. A receiverId alapján. A kapcsolat csak olvasható (insertable=false, updatable=false).
+| Shelter | ManyToOne | Opcionálisan kapcsolódik egy menhelyhez. A shelterId alapján. A kapcsolat csak olvasható (insertable=false, updatable=false).
+| Pet | ManyToOne | Opcionálisan kapcsolódik egy állathoz. A petId alapján. A kapcsolat csak olvasható (insertable=false, updatable=false).
+|===
+
+== Üzleti szabályok
+
+[cols="1,3"]
+|===
+| Szabály | Leírás
+| R1 | Egy üzenetnek mindig van küldője és címzettje (mindkét mező kötelező).
+| R2 | Az üzenet küldési ideje automatikusan generálódik és nem módosítható.
+| R3 | Egy üzenet alapértelmezetten olvasatlannak (isRead = false) számít, amíg azt meg nem nyitják.
+| R4 | Egy üzenet opcionálisan kapcsolódhat egy menhelyhez vagy egy állathoz, ha az adott kommunikáció egy örökbefogadással kapcsolatos.
+|===
+
+== Példa kód az entitás használatára
+
+[source,java]
+----
+// Új üzenet létrehozása
+Message message = Message.builder()
+    .senderId(senderId)
+    .receiverId(receiverId)
+    .content("Szia! Érdeklődnék a cicáról.")
+    .shelterId(shelterId) // opcionális
+    .petId(petId) // opcionális
+    .isRead(false)
+    .sentAt(ZonedDateTime.now())
+    .build();
+
+messageRepository.save(message);
+----
+
+== API végpontok
+
+[cols="1,1,3"]
+|===
+| Végpont | HTTP metódus | Leírás
+| /api/messages/{userId} | GET | Egy adott felhasználó beérkezett üzeneteinek lekérdezése
+| /api/messages/send | POST | Új üzenet küldése (küldő és címzett megadásával)
+| /api/messages/{messageId}/read | PATCH | Egy adott üzenet olvasottra állítása
+| /api/messages/conversations/{userId} | GET | Egy felhasználó összes beszélgetésének kilistázása
+|===
+
+== Statisztikák és elemzések
+
+[cols="1,3"]
+|===
+| Statisztika | Leírás
+| Üzenetek száma idő szerint | Elemzés arról, mikor aktívak a felhasználók kommunikációban.
+| Átlagos válaszidő | A felhasználók közti válaszadási gyorsaság mérése.
+| Olvasatlan üzenetek aránya | Megmutatja, hogy a beérkezett üzenetek mekkora része marad olvasatlanul.
+| Legaktívabb felhasználók | Azok a felhasználók, akik a legtöbb üzenetet küldték vagy kapták.
+|===

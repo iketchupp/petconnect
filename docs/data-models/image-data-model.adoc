@@ -1,0 +1,92 @@
+= Kép (Image) - Adatmodell
+
+== Leírás
+
+Az Image (Kép) entitás a rendszerben tárolt képeket reprezentálja, amelyeket a felhasználói profilképekhez (AvatarImage) és a kisállat-profilképekhez (PetImage) lehet társítani. Az entitás tartalmazza a képek metaadatait, például a tárolási kulcsot, tároló nevét, fájl típusát és méretét, valamint a feltöltés időpontját.
+
+== Attribútumok
+
+[cols="1h,3", options="header"]
+|===
+| Attribútum | Leírás
+| id | UUID típusú egyedi azonosító. Elsődleges kulcs, automatikusan generált.
+| key | A kép egyedi azonosítója a tárolóban (pl. fájlnév vagy path). Maximum 255 karakter, egyedi és kötelező.
+| bucket | A tároló neve (pl. S3 bucket), ahol a kép fizikailag megtalálható. Maximum 100 karakter, kötelező.
+| fileType | A fájl típusa (pl. image/jpeg, image/png). Maximum 50 karakter, kötelező.
+| fileSize | A fájl mérete bájtban, kötelező mező.
+| uploadedAt | A kép feltöltésének időpontja ZonedDateTime formátumban. Automatikusan generált (@CreationTimestamp), nem módosítható.
+|===
+
+== Kapcsolatok
+
+[cols="1,1,3"]
+|===
+| Kapcsolódó entitás | Kapcsolat típusa | Leírás
+| AvatarImage | OneToOne (mappedBy = "image") | Egy felhasználó vagy menhely profilképét reprezentálja. Egy kép csak egy profilképhez tartozhat. Kaskádolt műveletekkel és árva rekordok törlésével.
+| PetImage | OneToOne (mappedBy = "image") | Egy kisállat képét reprezentálja. Egy kép csak egy kisállathoz tartozhat. Kaskádolt műveletekkel és árva rekordok törlésével.
+|===
+
+== Különleges funkciók
+
+[cols="1,3"]
+|===
+| Funkció | Leírás
+| getUrl() | Egy @Transient metódus, amely a tároló és a kulcs alapján felépíti a kép teljes URL-jét a konfigurációban megadott végpont segítségével.
+| setYamlConfig() | Statikus injektálási metódus, amely lehetővé teszi a konfigurációs adatok beállítását az URL generálásához.
+|===
+
+== Üzleti szabályok
+
+[cols="1,3"]
+|===
+| Szabály | Leírás
+| R1 | Egy kép csak egyszer használható fel profil- vagy kisállatképként (OneToOne kapcsolat biztosítja).
+| R2 | A key mező egyedi, így nem fordulhat elő két azonos fájlnév a tárolóban.
+| R3 | A feltöltés dátuma (uploadedAt) automatikusan generálódik, és nem módosítható.
+| R4 | Egy kép törlése automatikusan eltávolítja a kapcsolódó AvatarImage vagy PetImage rekordot is (orphanRemoval = true).
+|===
+
+== Példa kód az entitás használatára
+
+[source,java]
+----
+// Új kép létrehozása
+Image image = Image.builder()
+    .key("images/cute-puppy.jpg")
+    .bucket("petconnect-bucket")
+    .fileType("image/jpeg")
+    .fileSize(245678L)
+    .build();
+
+imageRepository.save(image);
+
+// URL elérése
+String imageUrl = image.getUrl(); // pl. "https://cdn.petconnect.org/petconnect-bucket/images/cute-puppy.jpg"
+----
+
+== API végpontok
+
+[cols="1,1,3"]
+|===
+| Végpont | HTTP metódus | Leírás
+| /api/images/{id} | GET | Kép adatainak lekérdezése azonosító alapján
+| /api/images | POST | Új kép feltöltése metaadatokkal
+| /api/images/{id} | DELETE | Kép törlése az azonosító alapján
+|===
+
+== Speciális jellemzők
+
+A @ToString és @EqualsAndHashCode annotációk az exclude paraméterrel vannak ellátva, amely kizárja az avatarImage és petImage mezőket a toString() és equals()/hashCode() metódusokból, elkerülve a végtelen rekurziót.
+
+A getUrl() metódus segítségével a képet a fájlszerveren keresztül lehet elérni. A metódus a konfigurációból betöltött végpontot kombinálja a bucket és key értékekkel az URL létrehozásához.
+
+== Statisztikák és elemzések
+
+[cols="1,3"]
+|===
+| Statisztika | Leírás
+| Tárolási hely kihasználtság | A fájlméretek alapján számolható, mennyi tárhelyet foglalnak el a képek.
+| Képtípus eloszlás | Megmutatja, milyen arányban kerülnek feltöltésre különböző fájltípusok (pl. PNG, JPG).
+| Feltöltési trendek | Időbeli eloszlás alapján elemezhető a képek feltöltési gyakorisága.
+| Legnézettebb profilképek (ha nyilvántartva van) | A legtöbb megtekintést elért profil- vagy kisállatképek listája.
+|===
