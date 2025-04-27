@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.petconnect.backend.model.Shelter;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -108,4 +109,8 @@ public interface ShelterRepository extends JpaRepository<Shelter, UUID> {
 
     @Query("SELECT COUNT(s) FROM Shelter s WHERE s.ownerId = :ownerId")
     long countByOwnerId(@Param("ownerId") UUID ownerId);
+
+    @Modifying
+    @Query(value = "UPDATE shelter SET avatar_image_id = NULL WHERE id = :shelterId", nativeQuery = true)
+    void updateAvatarImageIdToNull(@Param("shelterId") UUID shelterId);
 }

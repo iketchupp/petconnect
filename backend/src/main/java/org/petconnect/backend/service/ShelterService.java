@@ -14,6 +14,7 @@ import org.petconnect.backend.dto.shelter.ShelterFilters;
 import org.petconnect.backend.dto.shelter.SheltersResponse;
 import org.petconnect.backend.dto.user.UserDTO;
 import org.petconnect.backend.exception.ResourceNotFoundException;
+import org.petconnect.backend.exception.UnauthorizedException;
 import org.petconnect.backend.model.Address;
 import org.petconnect.backend.model.AvatarImage;
 import org.petconnect.backend.model.Image;
@@ -236,7 +237,7 @@ public class ShelterService {
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("Only the shelter owner can update the shelter");
+            throw new UnauthorizedException("Only the shelter owner can update the shelter");
         }
 
         // Update shelter fields
@@ -300,7 +301,7 @@ public class ShelterService {
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("Only the shelter owner can update this shelter");
+            throw new UnauthorizedException("Only the shelter owner can update this shelter");
         }
 
         // Delete old avatar if it exists
@@ -353,7 +354,7 @@ public class ShelterService {
 
         // Verify user is the owner
         if (!shelter.getOwnerId().equals(currentUser.getId())) {
-            throw new IllegalArgumentException("Only the shelter owner can delete this shelter");
+            throw new UnauthorizedException("Only the shelter owner can delete this shelter");
         }
 
         // Find and delete all pets associated with the shelter
@@ -378,6 +379,11 @@ public class ShelterService {
         // Delete shelter's avatar if exists
         if (shelter.getAvatarImageId() != null) {
             final UUID avatarId = shelter.getAvatarImageId();
+
+            // Use a direct SQL update to break the foreign key reference first
+            shelterRepository.updateAvatarImageIdToNull(shelterId);
+
+            // Then delete the avatar image
             AvatarImage avatar = avatarImageRepository.findById(avatarId)
                     .orElseThrow(() -> new ResourceNotFoundException("Avatar", "id", avatarId));
             imageService.deleteImage(avatar.getImage().getKey());
